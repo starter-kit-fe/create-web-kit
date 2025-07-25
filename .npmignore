@@ -1,0 +1,20 @@
+# Source files
+src/
+*.ts
+tsconfig.json
+
+# Build files
+temp-dist/
+scripts/
+
+# Development files
+.gitignore
+*.md
+
+# Dependencies
+node_modules/
+*.log
+
+# IDE
+.vscode/
+.idea/

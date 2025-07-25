@@ -1,0 +1,60 @@
+{
+    "name": "create-web-kit",
+    "version": "1.0.0",
+    "description": "A powerful scaffolding tool for creating modern frontend projects with Vue, Next.js, and Electron templates",
+    "type": "module",
+    "bin": {
+        "create-web-kit": "dist/index.js"
+    },
+    "files": [
+        "dist"
+    ],
+    "engines": {
+        "node": "^18.0.0 || >=20.0.0"
+    },
+    "scripts": {
+        "build": "tsc -d --outDir temp-dist && node scripts/obfuscate.mjs",
+        "dev": "tsc --watch",
+        "start": "node dist/index.js",
+        "test": "node dist/index.js --help",
+        "prepublishOnly": "npm run build",
+        "prepack": "node scripts/pre-publish.mjs",
+        "clean": "rm -rf dist temp-dist"
+    },
+    "keywords": [
+        "scaffolding",
+        "template",
+        "cli",
+        "starter-kit",
+        "nextjs",
+        "vue",
+        "electron",
+        "frontend",
+        "typescript",
+        "create-app"
+    ],
+    "author": "Your Name <your.email@example.com>",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/yourusername/web-forge.git"
+    },
+    "bugs": {
+        "url": "https://github.com/yourusername/web-forge/issues"
+    },
+    "homepage": "https://github.com/yourusername/web-forge#readme",
+    "dependencies": {
+        "@clack/prompts": "^0.7.0",
+        "cross-spawn": "^7.0.3",
+        "mri": "^1.2.0",
+        "picocolors": "^1.0.0"
+    },
+    "devDependencies": {
+        "@types/cross-spawn": "^6.0.6",
+        "@types/javascript-obfuscator": "^0.17.0",
+        "@types/mri": "^1.1.5",
+        "@types/node": "^20.0.0",
+        "javascript-obfuscator": "^4.1.1",
+        "typescript": "^5.0.0"
+    }
+}
