@@ -43,3 +43,67 @@ export function getFullCustomCommand(
       })
   );
 }
+
+export function replacePackageManagerInCommand(
+  command: string,
+  pkgInfo?: PkgInfo
+): string {
+  const pkgManager = pkgInfo ? pkgInfo.name : "npm";
+  const isYarn1 = pkgManager === "yarn" && pkgInfo?.version.startsWith("1.");
+
+  return (
+    command
+      // Replace pnpx/npx with appropriate package manager
+      .replace(/^pnpx\s/, () => {
+        if (pkgManager === "yarn") {
+          return isYarn1 ? "npx " : "yarn dlx ";
+        }
+        if (pkgManager === "bun") {
+          return "bunx ";
+        }
+        if (pkgManager === "npm") {
+          return "npx ";
+        }
+        return "pnpx ";
+      })
+      // Replace pnpm dlx with appropriate package manager
+      .replace(/^pnpm dlx\s/, () => {
+        if (pkgManager === "yarn") {
+          return isYarn1 ? "npx " : "yarn dlx ";
+        }
+        if (pkgManager === "bun") {
+          return "bunx ";
+        }
+        if (pkgManager === "npm") {
+          return "npx ";
+        }
+        return "pnpm dlx ";
+      })
+      // Replace pnpm add with appropriate package manager
+      .replace(/^pnpm add\s/, () => {
+        if (pkgManager === "yarn") {
+          return "yarn add ";
+        }
+        if (pkgManager === "bun") {
+          return "bun add ";
+        }
+        if (pkgManager === "npm") {
+          return "npm install ";
+        }
+        return "pnpm add ";
+      })
+      // Replace pnpm create with appropriate package manager
+      .replace(/^pnpm create\s/, () => {
+        if (pkgManager === "yarn") {
+          return "yarn create ";
+        }
+        if (pkgManager === "bun") {
+          return "bun create ";
+        }
+        if (pkgManager === "npm") {
+          return "npm create ";
+        }
+        return "pnpm create ";
+      })
+  );
+}

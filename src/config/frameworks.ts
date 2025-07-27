@@ -36,6 +36,21 @@ export const FRAMEWORKS: Framework[] = [
             description: "Installing development dependencies",
             workingDir: "target",
           },
+          {
+            command: "pnpm add date-fns",
+            description: "Installing date-fns for date utilities",
+            workingDir: "target",
+          },
+          {
+            command: "pnpm add next-themes",
+            description: "Installing next-themes for theme support",
+            workingDir: "target",
+          },
+          {
+            command: "pnpm dlx shadcn@latest add --all",
+            description: "Installing all shadcnui components",
+            workingDir: "target",
+          },
         ],
       },
       {

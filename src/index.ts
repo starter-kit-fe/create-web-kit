@@ -189,7 +189,13 @@ async function init() {
 
   // Handle multi-step commands
   if (selectedVariant?.multiStepCommands) {
-    await executeMultiStepCommands(selectedVariant, targetDir, root, cwd);
+    await executeMultiStepCommands(
+      selectedVariant,
+      targetDir,
+      root,
+      cwd,
+      pkgInfo
+    );
     createProjectFiles(template, root);
 
     const successMessage = generateSuccessMessage(targetDir, pkgManager);
