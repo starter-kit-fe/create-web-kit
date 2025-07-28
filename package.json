@@ -1,6 +1,6 @@
 {
   "name": "create-web-kit",
-  "version": "25.0728.0816",
+  "version": "25.0728.0955",
   "description": "A powerful scaffolding tool for creating modern frontend projects with Vue, Next.js, and Electron templates",
   "type": "module",
   "bin": {
@@ -37,12 +37,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/web-forge.git"
+    "url": "https://github.com/starter-kit-fe/create-web-kit"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/web-forge/issues"
+    "url": "https://github.com/starter-kit-fe/create-web-kit/issues"
   },
-  "homepage": "https://github.com/yourusername/web-forge#readme",
+  "homepage": "https://github.com/starter-kit-fe/create-web-kit#readme",
   "dependencies": {
     "@clack/prompts": "^0.7.0",
     "cross-spawn": "^7.0.3",

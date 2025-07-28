@@ -1,215 +1,151 @@
-# Create Starter Kit
+# Web Kit
 
-一个强大的前端项目脚手架工具，支持多种框架和模板。
+一个强大的前端项目脚手架工具，基于官方脚手架命令整合开发者常用配置。
 
-## 特性
+## 核心理念
 
-- 🚀 支持多种主流框架：Next.js、Vue 3、Electron
-- 🎨 内置精美 UI 组件库集成
-- 📦 智能包管理器检测 (npm, pnpm, yarn, bun)
-- 🔧 多步骤自动化项目设置
-- 🎯 交互式命令行界面
-- 🔒 代码保护和混淆
+本工具**不提供预制模板**，而是：
 
-## 支持的模板
+- 🎯 **调用官方脚手架**：使用各框架官网提供的最新安装命令
+- 🔧 **智能配置整合**：自动添加开发者常用的工具和配置
+- 📦 **一键式设置**：将多个配置步骤合并为一个命令
+- 🚀 **始终最新**：确保使用框架的最新稳定版本
 
-| 模板           | 描述               | 技术栈                          |
-| -------------- | ------------------ | ------------------------------- |
-| nextjs-csr     | Next.js 客户端渲染 | Next.js + ShadcnUI + TypeScript |
-| nextjs-ssr     | Next.js 服务端渲染 | Next.js + ShadcnUI + TypeScript |
-| vue3           | Vue 3 现代化开发   | Vue 3 + TypeScript + Vite       |
-| electron-react | Electron + React   | Electron + React + TypeScript   |
-| electron-vue   | Electron + Vue     | Electron + Vue 3 + TypeScript   |
+## 工作原理
 
-## Usage
+1. **调用官方命令**：如 `create-next-app`、`create-vue` 等官方脚手架
+2. **检测项目类型**：分析生成的项目结构和配置
+3. **添加开发配置**：自动安装和配置常用的开发工具：
+   - ESLint 配置优化
+   - 环境变量默认配置
+   - 开发依赖包管理
+   - 代码格式化工具
+4. **智能包管理**：自动检测并使用合适的包管理器
 
-You can use this scaffolding tool in several ways:
+## 支持的框架
 
-### Interactive Mode
+| 框架         | 官方命令          | 额外配置                          |
+| ------------ | ----------------- | --------------------------------- |
+| **Next.js**  | `create-next-app` | ShadcnUI + ESLint 配置 + 环境变量 |
+| **Vue 3**    | `create-vue`      | TypeScript + Vite 优化 + 开发工具 |
+| **Electron** | 官方模板          | React/Vue 集成 + 构建配置         |
 
-```bash
-npm create starter-kit
-# or
-npx create-starter-kit
-```
+## 使用方法
 
-### With Project Name
-
-```bash
-npm create starter-kit my-project
-# or
-npx create-starter-kit my-project
-```
-
-### With Template
+### 交互式创建
 
 ```bash
-npm create starter-kit my-project --template react-ts
-# or
-npx create-starter-kit my-project -t vue-ts
+npx create-web-kit
 ```
 
-### Help
+### 指定项目名称
 
 ```bash
-npx create-starter-kit --help
-
+npx create-web-kit my-project
 ```
 
-## Available Templates
-
-### Frontend Templates
-
-- **vanilla** - Vanilla JavaScript
-- **vanilla-ts** - Vanilla TypeScript
-- **react** - React with JavaScript
-- **react-ts** - React with TypeScript
-- **vue** - Vue with JavaScript
-- **vue-ts** - Vue with TypeScript
-
-### Next.js Templates (Multi-Step Setup)
-
-- **nextjs-csr** - Next.js + CSR + ShadcnUI + TanStack
-  - Creates Next.js project with TypeScript and Tailwind
-  - Installs and configures ShadcnUI
-  - Adds @tanstack/react-table and @tanstack/react-query
-  - Sets up ESLint and Prettier configuration
-- **nextjs-app** - Next.js App Router (basic setup)
-
-### Vue Templates (Multi-Step Setup)
-
-- **vue** - Vue with JavaScript
-- **vue-ts** - Vue with TypeScript
-- **nuxt3-full** - Nuxt 3 + UI + State Management
-  - Creates Nuxt 3 project with TypeScript
-  - Installs @nuxt/ui, @pinia/nuxt, @vueuse/nuxt
-  - Sets up development tools and configuration
-
-### Backend Templates
-
-- **node** - Node.js with JavaScript
-- **node-ts** - Node.js with TypeScript
-- **express** - Express with JavaScript
-- **express-ts** - Express with TypeScript
-- **express-full** - Express + TypeScript + Full Stack
-  - Complete Express setup with TypeScript
-  - Includes middleware (cors, helmet, compression)
-  - Database ready with Prisma
-  - Environment configuration
-
-### Library Templates
-
-- **vite-lib** - Vite Library with JavaScript
-- **vite-lib-ts** - Vite Library with TypeScript
-
-## Examples
-
-### Creating a Next.js project with full setup
+### 指定框架类型
 
 ```bash
-npx create-starter-kit my-nextjs-app --template nextjs-csr
+npx create-web-kit my-project --template nextjs-csr
 ```
 
-This will:
+## 配置详情
 
-1. Create a Next.js project with TypeScript and Tailwind
-2. Install and configure ShadcnUI
-3. Add TanStack Table and Query libraries
-4. Set up ESLint and Prettier
-5. Create configuration files
+### Next.js 项目增强
 
-### Creating a Nuxt 3 project
+基于 `create-next-app` 官方命令，额外添加：
 
-```bash
-npx create-starter-kit my-nuxt-app --template nuxt3-full
-```
+- **ShadcnUI**：现代化 UI 组件库
+- **ESLint 规则**：优化的代码检查配置
+- **环境变量**：`.env.local` 模板文件
+- **TypeScript 配置**：严格模式和路径别名
+- **TanStack**：数据获取和表格组件
 
-This will:
+### Vue 3 项目增强
 
-1. Create a Nuxt 3 project
-2. Install UI library and state management
-3. Set up development tools
-4. Create project structure
+基于 `create-vue` 官方命令，额外添加：
 
-### Creating a full-stack Express API
+- **开发工具**：Vue DevTools 和 Vite 插件
+- **TypeScript 配置**：严格类型检查
+- **ESLint + Prettier**：代码格式化配置
+- **环境变量管理**：开发和生产环境配置
 
-```bash
-npx create-starter-kit my-api --template express-full
-```
+### Electron 项目增强
 
-This will:
+基于官方 Electron 模板，额外添加：
 
-1. Create an Express project with TypeScript
-2. Install essential middleware
-3. Set up Prisma for database
-4. Create starter API endpoints
-5. Configure environment variables
+- **前端框架集成**：React 或 Vue 3 支持
+- **构建配置**：开发和打包脚本优化
+- **TypeScript 支持**：主进程和渲染进程配置
+- **热重载**：开发环境自动刷新
 
-## Features
+## 为什么选择 Web Kit？
 
-- 🚀 **Fast** - Quick project setup with modern tooling
-- 🎨 **Multiple Templates** - Choose from various frontend and backend templates
-- 📦 **Package Manager Agnostic** - Works with npm, yarn, pnpm, and bun
-- 🛠️ **TypeScript Support** - First-class TypeScript support
-- 📋 **Interactive Prompts** - User-friendly CLI with beautiful prompts
-- 🎯 **Modern Tooling** - Uses latest versions of popular tools
+### 🎯 始终最新
 
-## Development
+- 直接使用官方脚手架，确保框架版本最新
+- 无需维护大量模板文件
+- 跟随官方更新节奏
 
-### Prerequisites
+### ⚡ 开发效率
 
-- Node.js 18 or higher
-- npm, yarn, or pnpm
+- 一个命令完成项目初始化和配置
+- 预装开发者常用工具
+- 智能检测和配置环境
 
-### Setup
+### � 配置合理
 
-```bash
-# Clone the repository
-git clone <repository-url>
-cd create-starter-kit
+- 基于最佳实践的配置
+- 适合团队开发的 ESLint 规则
+- 完整的 TypeScript 支持
 
-# Install dependencies
-npm install
+## 开发
 
-# Build the project
-npm run build
-
-# Test locally
-npm start
-```
-
-### Adding New Templates
-
-1. Create a new template directory: `template-{name}`
-2. Add template files inside the directory
-3. Update the `FRAMEWORKS` array in `src/index.ts`
-4. Files starting with `_` will be renamed (e.g., `_gitignore` → `.gitignore`)
-
-### Project Structure
+### 项目结构
 
 ```
 src/
-├── index.ts              # Main CLI logic
-template-react-ts/        # React TypeScript template
-├── package.json
-├── src/
-│   ├── App.tsx
-│   └── main.tsx
-├── index.html
-└── ...
-template-node-ts/         # Node.js TypeScript template
-├── package.json
-├── src/
-│   └── index.ts
-└── ...
+├── index.ts              # 主入口文件
+├── config/               # 配置文件
+│   ├── frameworks.ts     # 框架配置定义
+│   └── help.ts          # 帮助信息
+├── generators/          # 生成器
+│   ├── project.ts       # 项目生成逻辑
+│   └── template.ts      # 模板处理
+├── utils/               # 工具函数
+│   ├── file.ts          # 文件操作
+│   └── package-manager.ts # 包管理器检测
+└── types/               # 类型定义
+    └── index.ts
 ```
 
-## Publishing
+### 本地开发
 
 ```bash
+# 克隆项目
+git clone <repository-url>
+cd create-web-kit
+
+# 安装依赖
+npm install
+
+# 构建项目
 npm run build
-npm publish
+
+# 本地测试
+npm start
+
+# 开发模式
+npm run dev
 ```
+
+### 添加新框架支持
+
+1. 在 `src/config/frameworks.ts` 中添加框架配置
+2. 实现对应的生成逻辑
+3. 添加框架特定的配置增强
+4. 更新文档
 
 ## License
 
