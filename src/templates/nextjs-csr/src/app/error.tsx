@@ -1,7 +1,8 @@
 "use client";
-import { motion } from "motion/react";
-import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
+import { AnimationGeneratorType, motion } from "motion/react";
+import Link from "next/link";
 
 export default function ErrorPage({
   error,
@@ -10,7 +11,11 @@ export default function ErrorPage({
   error: Error;
   reset: () => void;
 }) {
-  const springConfig = { type: "spring", damping: 10, stiffness: 100 };
+  const springConfig = {
+    type: "spring" as AnimationGeneratorType,
+    damping: 10,
+    stiffness: 100,
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4">
