@@ -7,39 +7,43 @@ const TEMPLATE_NAME = "nextjs-csr";
 const TEMPLATE_FILES: TemplateFile[] = [
   // Config files
   { source: "prettier.config.json", destination: ".prettierrc", isJson: true },
-  { source: "eslint.config.js", destination: ".eslintrc.js" },
-  { source: "next.config.js", destination: "next.config.js" },
-
-  // Environment files
-  { source: ".env", destination: ".env.development" },
-  { source: ".env", destination: ".env.production" },
-  { source: ".env", destination: ".env.test" },
+  { source: "eslint.config.mjs", destination: "eslint.config.mjs" },
+  { source: "next.config.ts", destination: "next.config.ts" },
 
   // DevContainer
   {
-    source: "devcontainer.json",
+    source: ".devcontainer/devcontainer.json",
     destination: ".devcontainer/devcontainer.json",
     isJson: true,
   },
 
   // App files
-  { source: "layout.tsx", destination: "src/app/layout.tsx" },
-  { source: "not-found.tsx", destination: "src/app/not-found.tsx" },
+  { source: "src/app/layout.tsx", destination: "src/app/layout.tsx" },
+  { source: "src/app/not-found.tsx", destination: "src/app/not-found.tsx" },
+  { source: "src/app/error.tsx", destination: "src/app/error.tsx" },
 
   // Components
-  { source: "show.tsx", destination: "src/components/show.tsx" },
-  { source: "build-info.tsx", destination: "src/components/build-info.tsx" },
+  { source: "src/components/show.tsx", destination: "src/components/show.tsx" },
   {
-    source: "theme-provider.tsx",
-    destination: "src/components/providers/theme-provider.tsx",
+    source: "src/components/build-info.tsx",
+    destination: "src/components/build-info.tsx",
+  },
+
+  {
+    source: "src/components/providers/theme.tsx",
+    destination: "src/components/providers/theme.tsx",
   },
   {
-    source: "query-provider.tsx",
-    destination: "src/components/providers/query-provider.tsx",
+    source: "src/components/providers/query.tsx",
+    destination: "src/components/providers/query.tsx",
+  },
+  {
+    source: "src/components/providers/index.tsx",
+    destination: "src/components/providers/index.tsx",
   },
 
   // Utils
-  { source: "request.ts", destination: "src/utils/request.ts" },
+  { source: "src/lib/request.ts", destination: "src/lib/request.ts" },
 ];
 
 export function createNextjsCSRFiles(root: string): void {

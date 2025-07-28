@@ -37,13 +37,8 @@ export const FRAMEWORKS: Framework[] = [
             workingDir: "target",
           },
           {
-            command: "pnpm add date-fns",
+            command: "pnpm add date-fns next-themes motion",
             description: "Installing date-fns for date utilities",
-            workingDir: "target",
-          },
-          {
-            command: "pnpm add next-themes",
-            description: "Installing next-themes for theme support",
             workingDir: "target",
           },
           {
@@ -71,7 +66,7 @@ export const FRAMEWORKS: Framework[] = [
             workingDir: "target",
           },
           {
-            command: "pnpm add @tanstack/react-query next-auth prisma",
+            command: "pnpm add @tanstack/react-query next-auth prisma motion",
             description: "Installing SSR dependencies",
             workingDir: "target",
           },
