@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { execSync } from "node:child_process";
 import { copyTemplateFiles, type TemplateFile } from "../utils/template.js";
 
 const TEMPLATE_NAME = "nextjs-csr";
@@ -9,6 +10,11 @@ const TEMPLATE_FILES: TemplateFile[] = [
   { source: "prettier.config.json", destination: ".prettierrc", isJson: true },
   { source: "eslint.config.mjs", destination: "eslint.config.mjs" },
   { source: "next.config.ts", destination: "next.config.ts" },
+  { source: ".env.test", destination: ".env.test" },
+  { source: ".env.development", destination: ".env.development" },
+  { source: ".env.production", destination: ".env.production" },
+  { source: ".husky/pre-commit", destination: ".husky/pre-commit" },
+  { source: ".husky/_/husky.sh", destination: ".husky/_/husky.sh" },
 
   // DevContainer
   {
@@ -50,10 +56,95 @@ export function createNextjsCSRFiles(root: string): void {
   // Copy all template files
   copyTemplateFiles(TEMPLATE_NAME, TEMPLATE_FILES, root);
 
-  // Copy IE compatibility page from assets
+  // Configure package.json with husky and lint-staged
+  copyConfigHuskyPackage(root);
+
+  // Copy IE compatibility page
   copyIECompatibilityPage(root);
+
+  // Initialize husky after all files are copied
+  initializeHusky(root);
 }
 
+function copyConfigHuskyPackage(root: string): void {
+  const pkgPath = path.join(root, "package.json");
+
+  try {
+    const pkgContent = fs.readFileSync(pkgPath, "utf-8");
+    const pkg = JSON.parse(pkgContent);
+
+    // 添加 prepare 脚本
+    if (!pkg.scripts) {
+      pkg.scripts = {};
+    }
+    pkg.scripts.prepare = "husky";
+
+    // 添加 lint-staged 配置
+    pkg["lint-staged"] = {
+      "**/*.{js,jsx,ts,tsx,json,css,scss,md}": ["prettier --write"],
+      "**/*.{js,jsx,ts,tsx}": ["eslint --fix"],
+    };
+
+    // 写回文件
+    fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
+
+    console.log(
+      "✅ Updated package.json with husky and lint-staged configuration"
+    );
+  } catch (error) {
+    console.error("❌ Failed to update package.json:", error);
+  }
+}
+
+function initializeHusky(root: string): void {
+  try {
+    console.log("🔧 Initializing Git repository...");
+    try {
+      execSync("git init", {
+        cwd: root,
+        stdio: "inherit",
+      });
+      console.log("✅ Git repository initialized");
+    } catch (gitError) {
+      console.warn("⚠️ Git init failed or already initialized:", gitError);
+    }
+    execSync("npx husky install", {
+      cwd: root,
+      stdio: "inherit",
+    });
+    // 确保 .husky 目录存在
+    const huskyDir = path.join(root, ".husky");
+    if (!fs.existsSync(huskyDir)) {
+      fs.mkdirSync(huskyDir, { recursive: true });
+    }
+
+    // 确保 .husky/_/ 目录存在
+    const huskyUnderscoreDir = path.join(huskyDir, "_");
+    if (!fs.existsSync(huskyUnderscoreDir)) {
+      fs.mkdirSync(huskyUnderscoreDir, { recursive: true });
+    }
+
+    // 创建 pre-commit 钩子文件
+    const preCommitPath = path.join(huskyDir, "pre-commit");
+    const preCommitContent = `#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+npx lint-staged
+`;
+    fs.writeFileSync(preCommitPath, preCommitContent);
+
+    // 设置执行权限
+    try {
+      fs.chmodSync(preCommitPath, 0o755);
+    } catch (chmodError) {
+      console.warn("⚠️ Could not set execute permission for pre-commit hook");
+    }
+
+    console.log("✅ Husky pre-commit hook created successfully");
+  } catch (error) {
+    console.error("❌ Failed to initialize husky:", error);
+  }
+}
 function copyIECompatibilityPage(root: string): void {
   const ieHtmlPath = path.join(
     path.dirname(new URL(import.meta.url).pathname),
@@ -64,21 +155,7 @@ function copyIECompatibilityPage(root: string): void {
   try {
     ieHtmlContent = fs.readFileSync(ieHtmlPath, "utf-8");
   } catch (error) {
-    // Fallback content if file doesn't exist
-    ieHtmlContent = `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-    <meta name="renderer" content="webkit" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>浏览器兼容性提示</title>
-</head>
-<body>
-    <h1>请升级您的浏览器</h1>
-    <p>您正在使用过时的浏览器版本，请升级到现代浏览器以获得更好的体验。</p>
-</body>
-</html>`;
+    console.error(error);
   }
 
   // Ensure public directory exists

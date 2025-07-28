@@ -32,7 +32,8 @@ export const FRAMEWORKS: Framework[] = [
             workingDir: "target",
           },
           {
-            command: "pnpm add -D prettier @types/node",
+            command:
+              "pnpm add -D prettier @types/node husky lint-staged prettier-plugin-tailwindcss @trivago/prettier-plugin-sort-imports eslint-config-prettier",
             description: "Installing development dependencies",
             workingDir: "target",
           },
