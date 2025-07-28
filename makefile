@@ -44,8 +44,8 @@ push-tag: push-version
 dev:
 	@$(NPM) run start
 
-build:
-	@$(NPM) run package
+publish: update-version
+	@$(NPM) run build && npm publish
 
 
 .PHONY: update-version push-version push-tag dev build

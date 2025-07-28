@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const srcTemplatesDir = path.join(process.cwd(), 'src/templates')
-const tempDistDir = path.join(process.cwd(), 'temp-dist')
+const tempDistDir = path.join(process.cwd(), 'dist')
 const tempTemplatesDir = path.join(tempDistDir, 'templates')
 
 console.log('📂 Copying template files...')
