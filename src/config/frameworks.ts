@@ -27,7 +27,8 @@ export const FRAMEWORKS: Framework[] = [
             workingDir: "target",
           },
           {
-            command: "pnpm add @tanstack/react-table @tanstack/react-query",
+            command:
+              "pnpm add @tanstack/react-table @tanstack/react-query @tanstack/react-query-devtools",
             description: "Installing TanStack Table and Query",
             workingDir: "target",
           },

@@ -2,7 +2,6 @@
  * HTTP 请求类封装（强类型，无 any）
  * 配合 React Query 使用，简化超时和重试逻辑
  */
-
 import { toast } from "sonner";
 
 interface RequestConfig {
@@ -102,19 +101,6 @@ export class HttpClient {
         if (jsonResponse.code == 401) {
           // 清除本地存储
           localStorage.clear();
-
-          // 退出用户状态
-          if (typeof window !== "undefined") {
-            // 动态导入store避免循环依赖
-            import("@/store")
-              .then(({ useStore }) => {
-                const { logout, openLoginDialog } = useStore.getState();
-                logout();
-                openLoginDialog();
-              })
-              .catch(console.error);
-          }
-
           toast.error("登录信息已过期，请重新登录");
         }
         return jsonResponse;
