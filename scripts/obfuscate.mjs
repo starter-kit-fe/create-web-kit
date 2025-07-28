@@ -40,6 +40,24 @@ function obfuscateFile(filePath, outputPath) {
 
     const sourceCode = fs.readFileSync(filePath, 'utf8')
 
+    // Skip JSX files (check for JSX syntax)
+    if (sourceCode.includes('<') && sourceCode.includes('/>') ||
+        sourceCode.includes('jsx') ||
+        sourceCode.includes('React') ||
+        filePath.includes('layout.js') ||
+        filePath.includes('not-found.js') ||
+        filePath.includes('theme-provider.js') ||
+        filePath.includes('query-provider.js')) {
+        console.log(`⏭️ Skipping JSX file: ${path.relative(process.cwd(), filePath)}`)
+        const outputDir = path.dirname(outputPath)
+        if (!fs.existsSync(outputDir)) {
+            fs.mkdirSync(outputDir, { recursive: true })
+        }
+        fs.copyFileSync(filePath, outputPath)
+        console.log(`📋 Copied original: ${path.relative(process.cwd(), outputPath)}`)
+        return
+    }
+
     try {
         const obfuscatedCode = obfuscator.obfuscate(sourceCode, lightObfuscatorOptions).getObfuscatedCode()
 

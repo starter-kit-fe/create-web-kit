@@ -1,6 +1,6 @@
 {
   "name": "create-web-kit",
-  "version": "25.0727.1508",
+  "version": "25.0728.0816",
   "description": "A powerful scaffolding tool for creating modern frontend projects with Vue, Next.js, and Electron templates",
   "type": "module",
   "bin": {
@@ -13,7 +13,7 @@
     "node": "^18.0.0 || >=20.0.0"
   },
   "scripts": {
-    "build": "tsc -d --outDir temp-dist && node scripts/obfuscate.mjs",
+    "build": "tsc -d --outDir temp-dist && node scripts/copy-templates.mjs && node scripts/obfuscate.mjs",
     "dev": "tsc --watch",
     "start": "node dist/index.js",
     "test": "node dist/index.js --help",
