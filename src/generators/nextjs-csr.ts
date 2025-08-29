@@ -89,51 +89,34 @@ function copyConfigHuskyPackage(root: string): void {
     // 仅当不存在时写入，避免覆盖用户自定义内容
     if (!pkg.seo) {
       pkg.seo = {
-        title: "OneFile - 聚合对象存储上传平台",
-        description:
-          "OneFile 是一个聚合上传平台，支持 OSS、COS、Cloudflare R2、AWS S3、Oracle Object Storage 等多云存储，提供大文件分片上传、断点续传与跨云文件管理。",
-        keywords: [
-          "OneFile",
-          "文件上传",
-          "大文件分片上传",
-          "对象存储",
-          "OSS",
-          "COS",
-          "R2",
-          "S3",
-          "Oracle Object Storage",
-          "多云存储",
-          "聚合上传",
-          "云存储管理",
-        ],
+        title: "nextjs-csr",
+        description: "nextjs-csr description",
+        keywords: ["keywords", "keywords2"],
         og: {
-          title: "OneFile - 聚合对象存储上传平台",
-          description:
-            "支持 OSS、COS、Cloudflare R2、AWS S3、Oracle Object Storage 等多云存储。提供大文件分片上传、断点续传、跨云文件统一管理。",
-          image: "https://onefile.h06i.com/pwa-512x512.png",
-          url: "https://onefile.h06i.com",
+          title: "nextjs-csr",
+          description: "nextjs-csr",
+          image: "https://nextjs-csr.com/pwa-512x512.png",
+          url: "https://nextjs-csr.com",
           type: "website",
         },
         twitter: {
           card: "summary_large_image",
-          title: "OneFile - 聚合对象存储上传平台",
-          description:
-            "多云对象存储聚合上传，支持 OSS、COS、R2、S3，大文件分片上传与断点续传。",
-          image: "https://onefile.h06i.com/pwa-512x512.png",
+          title: "nextjs-csr",
+          description: "nextjs-csr",
+          image: "https://nextjs-csr.com/pwa-512x512.png",
         },
         jsonLd: {
           "@context": "https://schema.org",
           "@type": "WebSite",
           name: "OneFile",
-          url: "https://onefile.h06i.com",
-          description:
-            "OneFile 是一个聚合上传平台，支持 OSS、COS、Cloudflare R2、AWS S3、Oracle Object Storage 等多云存储，提供大文件分片上传、断点续传与跨云文件管理。",
+          url: "https://nextjs-csr.com",
+          description: "nextjs-csr。",
           publisher: {
             "@type": "Organization",
             name: "OneFile",
             logo: {
               "@type": "ImageObject",
-              image: "https://onefile.h06i.com/pwa-512x512.png",
+              image: "https://nextjs-csr.com/pwa-512x512.png",
             },
           },
         },

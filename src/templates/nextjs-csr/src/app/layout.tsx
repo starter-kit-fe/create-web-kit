@@ -1,10 +1,14 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
 import { Providers } from "@/components/providers";
+import type { Metadata } from "next";
+import { Geist } from "next/font/google";
+import Script from "next/script";
 
-const inter = Inter({ subsets: ["latin"] });
-
+import pkg from "../../package.json";
+import "./globals.css";
+const font = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
 export const metadata: Metadata = {
   title: pkg.seo.title,
   description: pkg.seo.description,
@@ -73,7 +77,6 @@ export default function RootLayout({
             strategy="beforeInteractive"
           />
         )}
-      </head>
         {/* eslint-disable-next-line @next/next/no-before-interactive-script-outside-document */}
         <script
           dangerouslySetInnerHTML={{
@@ -89,7 +92,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={inter.className} suppressHydrationWarning>
+      <body className={font.className} suppressHydrationWarning>
         <Providers>{children}</Providers>
       </body>
     </html>
