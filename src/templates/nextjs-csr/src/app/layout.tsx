@@ -77,7 +77,6 @@ export default function RootLayout({
             strategy="beforeInteractive"
           />
         )}
-        {/* eslint-disable-next-line @next/next/no-before-interactive-script-outside-document */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
