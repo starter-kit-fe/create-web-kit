@@ -1,6 +1,6 @@
 {
   "name": "create-web-kit",
-  "version": "25.1117.1100",
+  "version": "25.1117.1926",
   "description": "A powerful scaffolding tool for creating modern frontend projects with Vue, Next.js, and Electron templates",
   "type": "module",
   "bin": {
