@@ -13,6 +13,7 @@ const TEMPLATE_FILES: TemplateFile[] = [
   { source: ".env.test", destination: ".env.test" },
   { source: ".env.development", destination: ".env.development" },
   { source: ".env.production", destination: ".env.production" },
+  { source: ".env.stage", destination: ".env.stage" },
   { source: ".husky/pre-commit", destination: ".husky/pre-commit" },
   { source: ".husky/_/husky.sh", destination: ".husky/_/husky.sh" },
 
@@ -78,6 +79,10 @@ function copyConfigHuskyPackage(root: string): void {
       pkg.scripts = {};
     }
     pkg.scripts.prepare = "husky";
+    if (!pkg.scripts["build:stage"]) {
+      pkg.scripts["build:stage"] =
+        "NODE_ENV=production dotenv -e .env.stage next build";
+    }
 
     // 添加 lint-staged 配置
     pkg["lint-staged"] = {

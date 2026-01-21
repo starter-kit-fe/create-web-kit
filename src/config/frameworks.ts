@@ -39,8 +39,8 @@ export const FRAMEWORKS: Framework[] = [
             workingDir: "target",
           },
           {
-            command: "pnpm add date-fns next-themes motion",
-            description: "Installing date-fns for date utilities",
+            command: "pnpm add date-fns next-themes motion dotenv",
+            description: "Installing runtime utilities",
             workingDir: "target",
           },
           {
