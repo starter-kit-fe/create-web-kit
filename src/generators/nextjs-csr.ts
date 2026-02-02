@@ -80,7 +80,7 @@ function copyConfigHuskyPackage(root: string): void {
     pkg.scripts.prepare = "husky";
     if (!pkg.scripts["build:stage"]) {
       pkg.scripts["build:stage"] =
-        "NODE_ENV=production dotenv -e .env.stage next build";
+        "NODE_ENV=production sh -c 'set -a; . .env.stage; set +a; next build'";
     }
 
     // 添加 lint-staged 配置
