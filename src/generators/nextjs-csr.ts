@@ -10,7 +10,6 @@ const TEMPLATE_FILES: TemplateFile[] = [
   { source: "prettier.config.json", destination: ".prettierrc", isJson: true },
   { source: "eslint.config.mjs", destination: "eslint.config.mjs" },
   { source: "next.config.ts", destination: "next.config.ts" },
-  { source: ".env.test", destination: ".env.test" },
   { source: ".env.development", destination: ".env.development" },
   { source: ".env.production", destination: ".env.production" },
   { source: ".env.stage", destination: ".env.stage" },
@@ -132,7 +131,7 @@ function copyConfigHuskyPackage(root: string): void {
     fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
 
     console.log(
-      "✅ Updated package.json with husky, lint-staged and SEO configuration"
+      "✅ Updated package.json with husky, lint-staged and SEO configuration",
     );
   } catch (error) {
     console.error("❌ Failed to update package.json:", error);
@@ -191,7 +190,7 @@ npx lint-staged
 function copyIECompatibilityPage(root: string): void {
   const ieHtmlPath = path.join(
     path.dirname(new URL(import.meta.url).pathname),
-    "../assets/html/ie.html"
+    "../assets/html/ie.html",
   );
 
   let ieHtmlContent = "";
