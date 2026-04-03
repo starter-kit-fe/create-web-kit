@@ -1,14 +1,14 @@
-import fs from "node:fs";
-import path from "node:path";
 import spawn from "cross-spawn";
 import * as prompts from "@clack/prompts";
 import type { FrameworkVariant, PkgInfo } from "../types/index.js";
+import { splitCommand } from "../utils/command.js";
 import { replacePackageManagerInCommand } from "../utils/package-manager.js";
 import { createNextjsCSRFiles } from "./nextjs-csr.js";
 import { createNextjsSSRFiles } from "./nextjs-ssr.js";
 import { createVue3Files } from "./vue3.js";
 import { createElectronReactFiles } from "./electron-react.js";
 import { createElectronVueFiles } from "./electron-vue.js";
+import { createUserscriptFiles } from "./userscript.js";
 
 export async function executeMultiStepCommands(
   variant: FrameworkVariant,
@@ -31,7 +31,7 @@ export async function executeMultiStepCommands(
     command = replacePackageManagerInCommand(command, pkgInfo);
 
     // Parse the command and arguments
-    const [cmd, ...args] = command.split(" ");
+    const [cmd, ...args] = splitCommand(command);
 
     try {
       const result = spawn.sync(cmd, args, {
@@ -51,10 +51,14 @@ export async function executeMultiStepCommands(
   }
 }
 
-export function createProjectFiles(template: string, root: string): void {
+export function createProjectFiles(
+  template: string,
+  root: string,
+  pkgInfo?: PkgInfo
+): void {
   // Add configuration files for specific project types
   if (template === "nextjs-csr") {
-    createNextjsCSRFiles(root);
+    createNextjsCSRFiles(root, pkgInfo);
   }
 
   if (template === "nextjs-ssr") {
@@ -71,6 +75,10 @@ export function createProjectFiles(template: string, root: string): void {
 
   if (template === "electron-vue") {
     createElectronVueFiles(root);
+  }
+
+  if (template === "userscript") {
+    createUserscriptFiles(root);
   }
 }
 

@@ -4,8 +4,16 @@ import path from 'node:path'
 const srcTemplatesDir = path.join(process.cwd(), 'src/templates')
 const tempDistDir = path.join(process.cwd(), 'dist')
 const tempTemplatesDir = path.join(tempDistDir, 'templates')
+const srcAssetsDir = path.join(process.cwd(), 'src/assets')
+const tempAssetsDir = path.join(tempDistDir, 'assets')
 
 console.log('📂 Copying template files...')
+
+function resetDir(dir) {
+    if (fs.existsSync(dir)) {
+        fs.rmSync(dir, { recursive: true, force: true })
+    }
+}
 
 function copyDir(src, dest) {
     if (!fs.existsSync(dest)) {
@@ -28,6 +36,7 @@ function copyDir(src, dest) {
 }
 
 if (fs.existsSync(srcTemplatesDir)) {
+    resetDir(tempTemplatesDir)
     copyDir(srcTemplatesDir, tempTemplatesDir)
     console.log('🎉 Template files copied successfully!')
 } else {
@@ -35,10 +44,8 @@ if (fs.existsSync(srcTemplatesDir)) {
 }
 
 // Also copy assets if they exist
-const srcAssetsDir = path.join(process.cwd(), 'src/assets')
-const tempAssetsDir = path.join(tempDistDir, 'assets')
-
 if (fs.existsSync(srcAssetsDir)) {
+    resetDir(tempAssetsDir)
     copyDir(srcAssetsDir, tempAssetsDir)
     console.log('🎉 Asset files copied successfully!')
 }

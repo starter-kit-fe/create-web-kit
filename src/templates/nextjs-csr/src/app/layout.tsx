@@ -1,14 +1,18 @@
 import { Providers } from "@/components/providers";
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
-import Script from "next/script";
 
 import pkg from "../../package.json";
 import "./globals.css";
+
 const font = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
+
+const jsonLd =
+  pkg.seo.jsonLd ? JSON.stringify(pkg.seo.jsonLd).replace(/</g, "\\u003c") : null;
+
 export const metadata: Metadata = {
   title: pkg.seo.title,
   description: pkg.seo.description,
@@ -68,13 +72,11 @@ export default function RootLayout({
           content="#000000"
           media="(prefers-color-scheme: dark)"
         />
-        {pkg.seo.jsonLd && (
-          <Script
+        {jsonLd && (
+          <script
             id="onefile-jsonld"
             type="application/ld+json"
-            // 保持纯字符串注入，符合 Google / Next.js 推荐
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(pkg.seo.jsonLd) }}
-            strategy="beforeInteractive"
+            dangerouslySetInnerHTML={{ __html: jsonLd }}
           />
         )}
         <script

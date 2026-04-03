@@ -1,18 +1,38 @@
 #!/usr/bin/env node
 
-// Test script for the scaffolding tool
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { spawnSync } from "node:child_process";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-console.log('Testing scaffolding tool...')
-console.log('Current directory:', process.cwd())
-console.log('Script directory:', __dirname)
+console.log("🧪 Running CLI help smoke test...\n");
 
-// Import and run the main function
-import('./index.js').then(module => {
-    console.log('Scaffolding tool loaded successfully!')
-}).catch(error => {
-    console.error('Error loading scaffolding tool:', error)
-})
+const result = spawnSync(process.execPath, ["dist/index.js", "--help"], {
+  cwd: __dirname,
+  encoding: "utf-8",
+});
+
+if (result.status !== 0) {
+  console.error("❌ CLI help command failed");
+  console.error(result.stderr || result.stdout);
+  process.exit(1);
+}
+
+const helpOutput = result.stdout;
+const expectedSnippets = [
+  "Usage: create-web-kit",
+  "nextjs-csr",
+  "nextjs-ssr",
+  "electron-react",
+  "userscript",
+];
+
+for (const snippet of expectedSnippets) {
+  if (!helpOutput.includes(snippet)) {
+    console.error(`❌ Missing help output snippet: ${snippet}`);
+    process.exit(1);
+  }
+}
+
+console.log("✅ CLI help output looks correct");

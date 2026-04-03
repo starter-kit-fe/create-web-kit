@@ -1,7 +1,7 @@
 import colors from "picocolors";
 import type { Framework } from "../types/index.js";
 
-const { blue, cyan, green, magenta } = colors;
+const { blue, cyan, green, magenta, yellow } = colors;
 
 export const FRAMEWORKS: Framework[] = [
   {
@@ -157,6 +157,31 @@ export const FRAMEWORKS: Framework[] = [
           {
             command: "pnpm add -D @types/node prettier",
             description: "Installing development dependencies",
+            workingDir: "target",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    name: "userscript",
+    display: "Userscript",
+    color: yellow,
+    variants: [
+      {
+        name: "userscript",
+        display: "Userscript + TypeScript",
+        color: yellow,
+        multiStepCommands: [
+          {
+            command:
+              "pnpm dlx create-monkey@latest TARGET_DIR --template vue-ts",
+            description: "Creating userscript project with TypeScript",
+            workingDir: "root",
+          },
+          {
+            command: "pnpm add -D @types/tampermonkey",
+            description: "Installing userscript tooling",
             workingDir: "target",
           },
         ],

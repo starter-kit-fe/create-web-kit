@@ -107,3 +107,21 @@ export function replacePackageManagerInCommand(
       })
   );
 }
+
+export function getExecCommand(command: string, pkgInfo?: PkgInfo): string {
+  const pkgManager = pkgInfo ? pkgInfo.name : "npm";
+
+  if (pkgManager === "pnpm") {
+    return `pnpm exec ${command}`;
+  }
+
+  if (pkgManager === "yarn") {
+    return `yarn ${command}`;
+  }
+
+  if (pkgManager === "bun") {
+    return `bunx ${command}`;
+  }
+
+  return `npx ${command}`;
+}

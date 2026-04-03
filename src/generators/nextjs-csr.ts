@@ -1,6 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import { execSync } from "node:child_process";
+import spawn from "cross-spawn";
+import type { PkgInfo } from "../types/index.js";
+import { splitCommand } from "../utils/command.js";
+import { getExecCommand } from "../utils/package-manager.js";
 import { copyTemplateFiles, type TemplateFile } from "../utils/template.js";
 
 const TEMPLATE_NAME = "nextjs-csr";
@@ -52,7 +55,7 @@ const TEMPLATE_FILES: TemplateFile[] = [
   { source: "src/lib/request.ts", destination: "src/lib/request.ts" },
 ];
 
-export function createNextjsCSRFiles(root: string): void {
+export function createNextjsCSRFiles(root: string, pkgInfo?: PkgInfo): void {
   // Copy all template files
   copyTemplateFiles(TEMPLATE_NAME, TEMPLATE_FILES, root);
 
@@ -63,7 +66,7 @@ export function createNextjsCSRFiles(root: string): void {
   copyIECompatibilityPage(root);
 
   // Initialize husky after all files are copied
-  initializeHusky(root);
+  initializeHusky(root, pkgInfo);
 }
 
 function copyConfigHuskyPackage(root: string): void {
@@ -138,22 +141,16 @@ function copyConfigHuskyPackage(root: string): void {
   }
 }
 
-function initializeHusky(root: string): void {
+function initializeHusky(root: string, pkgInfo?: PkgInfo): void {
   try {
     console.log("🔧 Initializing Git repository...");
     try {
-      execSync("git init", {
-        cwd: root,
-        stdio: "inherit",
-      });
+      runCommand("git init", root);
       console.log("✅ Git repository initialized");
     } catch (gitError) {
       console.warn("⚠️ Git init failed or already initialized:", gitError);
     }
-    execSync("npx husky install", {
-      cwd: root,
-      stdio: "inherit",
-    });
+    runCommand(getExecCommand("husky install", pkgInfo), root);
     // 确保 .husky 目录存在
     const huskyDir = path.join(root, ".husky");
     if (!fs.existsSync(huskyDir)) {
@@ -171,7 +168,7 @@ function initializeHusky(root: string): void {
     const preCommitContent = `#!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-npx lint-staged
+${getExecCommand("lint-staged", pkgInfo)}
 `;
     fs.writeFileSync(preCommitPath, preCommitContent);
 
@@ -187,6 +184,19 @@ npx lint-staged
     console.error("❌ Failed to initialize husky:", error);
   }
 }
+
+function runCommand(command: string, cwd: string): void {
+  const [cmd, ...args] = splitCommand(command);
+  const result = spawn.sync(cmd, args, {
+    cwd,
+    stdio: "inherit",
+  });
+
+  if (result.status !== 0) {
+    throw new Error(`Command failed: ${command}`);
+  }
+}
+
 function copyIECompatibilityPage(root: string): void {
   const ieHtmlPath = path.join(
     path.dirname(new URL(import.meta.url).pathname),

@@ -16,7 +16,7 @@ import {
 } from "./config/frameworks.js";
 
 // Import types
-import type { Framework, FrameworkVariant, CliArgs } from "./types/index.js";
+import type { Framework, CliArgs } from "./types/index.js";
 
 // Import utilities
 import {
@@ -27,6 +27,7 @@ import {
   emptyDir,
   pkgFromUserAgent,
 } from "./utils/file.js";
+import { splitCommand } from "./utils/command.js";
 import { getFullCustomCommand } from "./utils/package-manager.js";
 
 // Import generators
@@ -61,7 +62,7 @@ async function init() {
   const pkgInfo = pkgFromUserAgent(process.env.npm_config_user_agent);
   const cancel = () => prompts.cancel("Operation cancelled");
 
-  prompts.intro(colors.bgCyan(colors.black(" create-web ")));
+  prompts.intro(colors.bgCyan(colors.black(" create-web-kit ")));
 
   // 1. Get project name and target dir
   let targetDir = argTargetDir;
@@ -196,7 +197,7 @@ async function init() {
       cwd,
       pkgInfo
     );
-    createProjectFiles(template, root);
+    createProjectFiles(template, root, pkgInfo);
 
     const successMessage = generateSuccessMessage(targetDir, pkgManager);
     prompts.outro(successMessage);
@@ -207,7 +208,7 @@ async function init() {
   const { customCommand } = selectedVariant ?? {};
   if (customCommand) {
     const fullCustomCommand = getFullCustomCommand(customCommand, pkgInfo);
-    const [command, ...args] = fullCustomCommand.split(" ");
+    const [command, ...args] = splitCommand(fullCustomCommand);
     const replacedArgs = args.map((arg) =>
       arg.replace("TARGET_DIR", () => targetDir)
     );
