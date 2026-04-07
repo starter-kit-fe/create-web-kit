@@ -170,13 +170,14 @@ export const FRAMEWORKS: Framework[] = [
     variants: [
       {
         name: "userscript",
-        display: "Userscript + TypeScript",
+        display: "Userscript + Vanilla TypeScript",
         color: yellow,
         multiStepCommands: [
           {
             command:
-              "pnpm dlx create-monkey@latest TARGET_DIR --template vue-ts",
-            description: "Creating userscript project with TypeScript",
+              "pnpm dlx create-monkey@latest TARGET_DIR --template vanilla-ts",
+            description:
+              "Creating userscript project with vanilla TypeScript",
             workingDir: "root",
           },
           {

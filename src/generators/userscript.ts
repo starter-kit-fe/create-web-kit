@@ -12,17 +12,23 @@ const TEMPLATE_FILES: TemplateFile[] = [
   { source: "tsconfig.app.json", destination: "tsconfig.app.json" },
   { source: "tsconfig.node.json", destination: "tsconfig.node.json" },
   { source: "vite.config.ts", destination: "vite.config.ts" },
-  { source: "src/App.vue", destination: "src/App.vue" },
   { source: "src/main.ts", destination: "src/main.ts" },
+  { source: "src/style.css", destination: "src/style.css" },
   { source: "src/vite-env.d.ts", destination: "src/vite-env.d.ts" },
 ];
 
 const DEFAULT_VITE_FILES = [
   "index.html",
   "public/vite.svg",
+  "src/typescript.svg",
+  "src/counter.ts",
   "src/App.vue",
+  "src/App.tsx",
+  "src/App.css",
   "src/components",
   "src/main.ts",
+  "src/main.tsx",
+  "src/index.css",
   "src/style.css",
   "src/assets",
   "src/vite-env.d.ts",
@@ -56,11 +62,12 @@ function updatePackageJson(root: string): void {
   pkg.scripts = {
     dev: "vite",
     build: "vite build",
-    typecheck: "vue-tsc --noEmit",
+    typecheck: "tsc -b",
   };
   pkg.keywords = [
     "userscript",
     "tampermonkey",
+    "vanilla",
     "vite",
     "vite-plugin-monkey",
     "typescript",

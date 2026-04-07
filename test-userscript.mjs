@@ -40,11 +40,16 @@ fs.writeFileSync(path.join(projectRoot, "tsconfig.app.json"), "{}\n");
 fs.writeFileSync(path.join(projectRoot, "tsconfig.node.json"), "{}\n");
 fs.writeFileSync(path.join(projectRoot, "src", "main.ts"), "console.log('old');\n");
 fs.mkdirSync(path.join(projectRoot, "src", "components"), { recursive: true });
-fs.writeFileSync(path.join(projectRoot, "src", "App.vue"), "<template>old</template>\n");
+fs.writeFileSync(path.join(projectRoot, "src", "App.tsx"), "export default null;\n");
+fs.writeFileSync(path.join(projectRoot, "src", "main.tsx"), "console.log('old react');\n");
 fs.writeFileSync(
-  path.join(projectRoot, "src", "components", "HelloWorld.vue"),
-  "<template>Hello</template>\n"
+  path.join(projectRoot, "src", "components", "HelloWorld.tsx"),
+  "export default function HelloWorld() { return null; }\n"
 );
+fs.writeFileSync(path.join(projectRoot, "src", "counter.ts"), "export {};\n");
+fs.writeFileSync(path.join(projectRoot, "src", "typescript.svg"), "<svg></svg>\n");
+fs.writeFileSync(path.join(projectRoot, "src", "App.css"), ".app {}\n");
+fs.writeFileSync(path.join(projectRoot, "src", "index.css"), "body {}\n");
 fs.writeFileSync(path.join(projectRoot, "src", "style.css"), "body {}\n");
 fs.writeFileSync(path.join(projectRoot, "src", "vite-env.d.ts"), "/// <reference types=\"vite/client\" />\n");
 fs.writeFileSync(path.join(projectRoot, "public", "vite.svg"), "<svg></svg>\n");
@@ -73,8 +78,8 @@ const expectedFiles = [
   "tsconfig.app.json",
   "tsconfig.node.json",
   "vite.config.ts",
-  "src/App.vue",
   "src/main.ts",
+  "src/style.css",
   "src/vite-env.d.ts",
 ];
 
@@ -87,8 +92,13 @@ for (const relativePath of expectedFiles) {
 
 const removedFiles = [
   "index.html",
-  "src/components/HelloWorld.vue",
-  "src/style.css",
+  "src/App.tsx",
+  "src/main.tsx",
+  "src/components/HelloWorld.tsx",
+  "src/counter.ts",
+  "src/typescript.svg",
+  "src/App.css",
+  "src/index.css",
   "public/vite.svg",
 ];
 
@@ -101,7 +111,7 @@ for (const relativePath of removedFiles) {
 
 if (
   pkg.scripts.build !== "vite build" ||
-  pkg.scripts.typecheck !== "vue-tsc --noEmit"
+  pkg.scripts.typecheck !== "tsc -b"
 ) {
   console.log("❌ package.json scripts were not rewritten correctly");
   process.exit(1);
@@ -109,6 +119,8 @@ if (
 
 if (
   !pkg.keywords.includes("vite-plugin-monkey") ||
+  !pkg.keywords.includes("vanilla") ||
+  pkg.keywords.includes("react") ||
   pkg.keywords.includes("amazon") ||
   pkg.keywords.includes("vue")
 ) {
@@ -121,14 +133,15 @@ const viteConfig = fs.readFileSync(
   "utf-8"
 );
 
-if (!viteConfig.includes('import vue from "@vitejs/plugin-vue"')) {
-  console.log("❌ vite.config.ts does not include Vue plugin");
+if (viteConfig.includes("@vitejs/plugin-react")) {
+  console.log("❌ vite.config.ts should not include React plugin");
   process.exit(1);
 }
 
 if (
   viteConfig.includes("Amazon") ||
   viteConfig.includes("amazon.") ||
+  !viteConfig.includes('entry: "src/main.ts"') ||
   !viteConfig.includes('fileName: "userscript.user.js"')
 ) {
   console.log("❌ vite.config.ts still contains old starter defaults");

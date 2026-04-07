@@ -62,13 +62,13 @@ const testCommands = [
   },
   {
     command:
-      "pnpm dlx create-monkey@latest TARGET_DIR --template vue-ts",
+      "pnpm dlx create-monkey@latest TARGET_DIR --template vanilla-ts",
     expected: {
-      npm: "npx create-monkey@latest TARGET_DIR --template vue-ts",
-      yarn1: "npx create-monkey@latest TARGET_DIR --template vue-ts",
-      yarn3: "yarn dlx create-monkey@latest TARGET_DIR --template vue-ts",
-      pnpm: "pnpm dlx create-monkey@latest TARGET_DIR --template vue-ts",
-      bun: "bunx create-monkey@latest TARGET_DIR --template vue-ts",
+      npm: "npx create-monkey@latest TARGET_DIR --template vanilla-ts",
+      yarn1: "npx create-monkey@latest TARGET_DIR --template vanilla-ts",
+      yarn3: "yarn dlx create-monkey@latest TARGET_DIR --template vanilla-ts",
+      pnpm: "pnpm dlx create-monkey@latest TARGET_DIR --template vanilla-ts",
+      bun: "bunx create-monkey@latest TARGET_DIR --template vanilla-ts",
     },
   },
 ];

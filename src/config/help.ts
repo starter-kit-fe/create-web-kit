@@ -20,4 +20,4 @@ ${blue      ('nextjs-ssr     Next.js SSR + ShadcnUI')}
 ${green     ('vue3           Vue 3 + TypeScript + Vite')}
 ${cyan      ('electron-react Electron + React + TS')}
 ${green     ('electron-vue   Electron + Vue 3 + TS')}
-${yellow    ('userscript     Userscript + TS')}`;
+${yellow    ('userscript     Userscript + Vanilla TS')}`;

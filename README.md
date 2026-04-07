@@ -30,7 +30,7 @@
 | **Next.js**  | `create-next-app` | CSR/SSR 变体 + ShadcnUI + TanStack + 环境变量 |
 | **Vue 3**    | `create-vue`      | TypeScript + Vite 优化 + 开发工具 |
 | **Electron** | 官方模板          | React/Vue 集成 + 构建配置         |
-| **Userscript** | `create-monkey` | 通用油猴脚本 + vite-plugin-monkey + TypeScript |
+| **Userscript** | `create-monkey` | 原生 TypeScript 油猴脚本 + vite-plugin-monkey |
 
 ## 使用方法
 
@@ -93,8 +93,8 @@ npx create-web-kit my-script --template userscript
 
 基于 `create-monkey` 官方命令，额外添加：
 
-- **Vue + vite-plugin-monkey**：userscript UI 与元数据打包
-- **TypeScript**：默认入口为 `src/main.ts`，并使用 `vue-tsc`
+- **vanilla-ts + vite-plugin-monkey**：最轻量的 userscript UI 与元数据打包
+- **TypeScript**：默认入口为 `src/main.ts`，并使用 `tsc -b`
 - **Tampermonkey 类型**：内置 `@types/tampermonkey`
 - **通用默认项**：预置悬浮入口与 userscript 元数据
 - **发布习惯**：`Makefile`、`userscript.user.js` / `userscript.meta.js` 输出约定
