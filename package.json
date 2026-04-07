@@ -1,6 +1,6 @@
 {
   "name": "create-web-kit",
-  "version": "26.407.1452",
+  "version": "26.408.0",
   "description": "A powerful scaffolding tool for creating modern frontend projects with Vue, Next.js, and Electron templates",
   "type": "module",
   "bin": {
@@ -15,7 +15,9 @@
   "scripts": {
     "build": "make build",
     "dev": "pnpx tsx src/index.ts",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "lint": "make lint",
+    "check": "make check"
   },
   "keywords": [
     "scaffolding",
