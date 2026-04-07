@@ -211,6 +211,7 @@ make pub
 
 ```bash
 make ps
+make changeset
 make new
 make check
 make up
@@ -229,7 +230,7 @@ make pub
 如果你想附带 changeset 发布说明：
 
 ```bash
-make new
+make changeset
 make ps
 make dry
 make pub
@@ -243,6 +244,7 @@ make pub
 其中：
 
 - `make ps`：查看当前待发布 changeset 列表；如果没有待发布项，会直接显示空列表
+- `make changeset`：创建一条 changeset，并自动 `git add` 新的 `.changeset/*.md`
 - `make new`：创建一条新的 changeset
 - `make check`：执行完整发布前检查
 - `make up`：如果有 pending changeset，就使用 `changeset version` 更新时间版本；如果没有，就保持当前版本

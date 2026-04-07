@@ -14,6 +14,7 @@ endif
 help:
 	@echo "Common commands:"
 	@echo "  make ps      # list pending changesets"
+	@echo "  make changeset # create a changeset and git add it"
 	@echo "  make new     # create a changeset (optional)"
 	@echo "  make build   # compile cli and copy templates/assets"
 	@echo "  make test    # run all tests"
@@ -24,12 +25,23 @@ help:
 	@echo "  make push    # publish, commit release files, and push tag"
 	@echo ""
 	@echo "Recommended release flow:"
-	@echo "  make new     # optional, only if you want release notes"
+	@echo "  make changeset # optional, only if you want release notes"
 	@echo "  make dry     # optional but recommended"
 	@echo "  make pub"
 
-new:
+changeset:
 	@$(PNPM) exec changeset
+	@files=$$(find .changeset -maxdepth 1 -type f -name '*.md' ! -name 'README.md' | sort); \
+		if [ -z "$$files" ]; then \
+			echo "No pending changesets."; \
+			exit 0; \
+		fi; \
+		git add $$files; \
+		echo "Staged changesets:"; \
+		for file in $$files; do echo "- $$file"; done
+
+new: changeset
+	@:
 
 ps:
 	@files=$$(find .changeset -maxdepth 1 -type f -name '*.md' ! -name 'README.md' | sort); \
@@ -137,4 +149,4 @@ dry: up
 
 push: pub _commit _tag
 
-.PHONY: help new ps build typecheck test test-unit test-integration check up dry pub push dev _require_cs _commit _tag
+.PHONY: help changeset new ps build typecheck test test-unit test-integration check up dry pub push dev _require_cs _commit _tag
