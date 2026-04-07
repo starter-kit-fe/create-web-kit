@@ -1,8 +1,8 @@
 import { Providers } from "@/components/providers";
+import { siteConfig } from "@/config/site";
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 
-import pkg from "../../package.json";
 import "./globals.css";
 
 const font = Geist({
@@ -11,27 +11,29 @@ const font = Geist({
 });
 
 const jsonLd =
-  pkg.seo.jsonLd ? JSON.stringify(pkg.seo.jsonLd).replace(/</g, "\\u003c") : null;
+  siteConfig.jsonLd
+    ? JSON.stringify(siteConfig.jsonLd).replace(/</g, "\\u003c")
+    : null;
 
 export const metadata: Metadata = {
-  title: pkg.seo.title,
-  description: pkg.seo.description,
-  keywords: pkg.seo.keywords,
+  title: siteConfig.title,
+  description: siteConfig.description,
+  keywords: siteConfig.keywords,
   openGraph: {
-    title: pkg.seo.og.title,
-    description: pkg.seo.og.description,
-    url: pkg.seo.og.url,
-    type: pkg.seo.og.type as "website",
-    images: pkg.seo.og.image,
+    title: siteConfig.og.title,
+    description: siteConfig.og.description,
+    url: siteConfig.og.url,
+    type: siteConfig.og.type as "website",
+    images: siteConfig.og.image,
   },
   twitter: {
-    card: pkg.seo.twitter.card as "summary_large_image",
-    title: pkg.seo.twitter.title,
-    description: pkg.seo.twitter.description,
-    images: pkg.seo.twitter.image,
+    card: siteConfig.twitter.card as "summary_large_image",
+    title: siteConfig.twitter.title,
+    description: siteConfig.twitter.description,
+    images: siteConfig.twitter.image,
   },
   // 建议与 og.url 同步，利于生成绝对 URL
-  metadataBase: new URL(pkg.seo.og.url),
+  metadataBase: new URL(siteConfig.og.url),
 };
 
 export default function RootLayout({

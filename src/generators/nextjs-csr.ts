@@ -1,12 +1,23 @@
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import spawn from "cross-spawn";
 import type { PkgInfo } from "../types/index.js";
 import { splitCommand } from "../utils/command.js";
-import { getExecCommand } from "../utils/package-manager.js";
 import { copyTemplateFiles, type TemplateFile } from "../utils/template.js";
+import { createPackageManagerAdapter } from "../core/package-manager.js";
+import {
+  ensureDirectory,
+  mergeJson,
+  updatePackageJson,
+} from "../core/operations/files.js";
 
 const TEMPLATE_NAME = "nextjs-csr";
+
+interface NextjsCsrGeneratorOptions {
+  noGit?: boolean;
+  verbose?: boolean;
+}
 
 const TEMPLATE_FILES: TemplateFile[] = [
   // Config files
@@ -30,6 +41,8 @@ const TEMPLATE_FILES: TemplateFile[] = [
   { source: "src/app/layout.tsx", destination: "src/app/layout.tsx" },
   { source: "src/app/not-found.tsx", destination: "src/app/not-found.tsx" },
   { source: "src/app/error.tsx", destination: "src/app/error.tsx" },
+  { source: "src/config/site.ts", destination: "src/config/site.ts" },
+  { source: "scripts/build-stage.mjs", destination: "scripts/build-stage.mjs" },
 
   // Components
   { source: "src/components/show.tsx", destination: "src/components/show.tsx" },
@@ -55,124 +68,122 @@ const TEMPLATE_FILES: TemplateFile[] = [
   { source: "src/lib/request.ts", destination: "src/lib/request.ts" },
 ];
 
-export function createNextjsCSRFiles(root: string, pkgInfo?: PkgInfo): void {
+export function createNextjsCSRFiles(
+  root: string,
+  pkgInfo?: PkgInfo,
+  options: NextjsCsrGeneratorOptions = {}
+): void {
   // Copy all template files
-  copyTemplateFiles(TEMPLATE_NAME, TEMPLATE_FILES, root);
+  copyTemplateFiles(
+    TEMPLATE_NAME,
+    TEMPLATE_FILES.filter((file) =>
+      options.noGit ? !file.destination.startsWith(".husky/") : true
+    ),
+    root
+  );
 
   // Configure package.json with husky and lint-staged
-  copyConfigHuskyPackage(root);
+  copyConfigHuskyPackage(root, options);
 
   // Copy IE compatibility page
   copyIECompatibilityPage(root);
 
   // Initialize husky after all files are copied
-  initializeHusky(root, pkgInfo);
+  initializeHusky(root, pkgInfo, options);
 }
 
-function copyConfigHuskyPackage(root: string): void {
-  const pkgPath = path.join(root, "package.json");
-
+function copyConfigHuskyPackage(
+  root: string,
+  options: NextjsCsrGeneratorOptions
+): void {
   try {
-    const pkgContent = fs.readFileSync(pkgPath, "utf-8");
-    const pkg = JSON.parse(pkgContent);
+    updatePackageJson<Record<string, unknown>>(root, (pkg) => {
+      const currentScripts =
+        typeof pkg.scripts === "object" && pkg.scripts
+          ? (pkg.scripts as Record<string, unknown>)
+          : {};
+      const currentLintStaged =
+        typeof pkg["lint-staged"] === "object" && pkg["lint-staged"]
+          ? (pkg["lint-staged"] as Record<string, unknown>)
+          : {};
 
-    // 添加 prepare 脚本
-    if (!pkg.scripts) {
-      pkg.scripts = {};
-    }
-    pkg.scripts.prepare = "husky";
-    if (!pkg.scripts["build:stage"]) {
-      pkg.scripts["build:stage"] =
-        "NODE_ENV=production sh -c 'set -a; . .env.stage; set +a; next build'";
-    }
+      const scripts: Record<string, unknown> = { ...currentScripts };
 
-    // 添加 lint-staged 配置
-    pkg["lint-staged"] = {
-      "**/*.{js,jsx,ts,tsx,json,css,scss,md}": ["prettier --write"],
-      "**/*.{js,jsx,ts,tsx}": ["eslint --fix"],
-    };
+      if (!options.noGit) {
+        scripts.prepare =
+          typeof currentScripts["prepare"] === "string"
+            ? currentScripts["prepare"]
+            : "husky";
+      }
 
-    // 添加默认 SEO 配置（用于首页 metadata）
-    // 仅当不存在时写入，避免覆盖用户自定义内容
-    if (!pkg.seo) {
-      pkg.seo = {
-        title: "nextjs-csr",
-        description: "nextjs-csr description",
-        keywords: ["keywords", "keywords2"],
-        og: {
-          title: "nextjs-csr",
-          description: "nextjs-csr",
-          image: "https://nextjs-csr.com/pwa-512x512.png",
-          url: "https://nextjs-csr.com",
-          type: "website",
-        },
-        twitter: {
-          card: "summary_large_image",
-          title: "nextjs-csr",
-          description: "nextjs-csr",
-          image: "https://nextjs-csr.com/pwa-512x512.png",
-        },
-        jsonLd: {
-          "@context": "https://schema.org",
-          "@type": "WebSite",
-          name: "OneFile",
-          url: "https://nextjs-csr.com",
-          description: "nextjs-csr。",
-          publisher: {
-            "@type": "Organization",
-            name: "OneFile",
-            logo: {
-              "@type": "ImageObject",
-              image: "https://nextjs-csr.com/pwa-512x512.png",
-            },
-          },
-        },
+      if (typeof scripts["build:stage"] !== "string") {
+        scripts["build:stage"] = "node scripts/build-stage.mjs";
+      }
+
+      const nextPkg: Record<string, unknown> = {
+        ...pkg,
+        scripts,
       };
-    }
 
-    // 写回文件
-    fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
+      if (!options.noGit) {
+        nextPkg["lint-staged"] = mergeJson(
+          currentLintStaged as Record<string, unknown>,
+          {
+            "**/*.{js,jsx,ts,tsx,json,css,scss,md}": ["prettier --write"],
+            "**/*.{js,jsx,ts,tsx}": ["eslint --fix"],
+          }
+        );
+      }
+
+      return nextPkg;
+    });
 
     console.log(
-      "✅ Updated package.json with husky, lint-staged and SEO configuration",
+      options.noGit
+        ? "✅ Updated package.json with non-git project configuration"
+        : "✅ Updated package.json with husky and lint-staged configuration"
     );
   } catch (error) {
     console.error("❌ Failed to update package.json:", error);
   }
 }
 
-function initializeHusky(root: string, pkgInfo?: PkgInfo): void {
+function initializeHusky(
+  root: string,
+  pkgInfo?: PkgInfo,
+  options: NextjsCsrGeneratorOptions = {}
+): void {
   try {
-    console.log("🔧 Initializing Git repository...");
-    try {
-      runCommand("git init", root);
-      console.log("✅ Git repository initialized");
-    } catch (gitError) {
-      console.warn("⚠️ Git init failed or already initialized:", gitError);
+    if (options.noGit) {
+      if (options.verbose) {
+        console.log("ℹ️ Skipping husky setup because --no-git is enabled");
+      }
+      return;
     }
-    runCommand(getExecCommand("husky install", pkgInfo), root);
-    // 确保 .husky 目录存在
+
+    const gitDir = path.join(root, ".git");
+    if (!fs.existsSync(gitDir)) {
+      console.warn("⚠️ Skipping husky install because no Git repository was found");
+      return;
+    }
+
+    const adapter = createPackageManagerAdapter(pkgInfo);
+    runCommand(adapter.exec("husky install"), root);
+
     const huskyDir = path.join(root, ".husky");
-    if (!fs.existsSync(huskyDir)) {
-      fs.mkdirSync(huskyDir, { recursive: true });
-    }
+    ensureDirectory(huskyDir);
 
-    // 确保 .husky/_/ 目录存在
     const huskyUnderscoreDir = path.join(huskyDir, "_");
-    if (!fs.existsSync(huskyUnderscoreDir)) {
-      fs.mkdirSync(huskyUnderscoreDir, { recursive: true });
-    }
+    ensureDirectory(huskyUnderscoreDir);
 
-    // 创建 pre-commit 钩子文件
     const preCommitPath = path.join(huskyDir, "pre-commit");
     const preCommitContent = `#!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-${getExecCommand("lint-staged", pkgInfo)}
+${adapter.exec("lint-staged")}
 `;
     fs.writeFileSync(preCommitPath, preCommitContent);
 
-    // 设置执行权限
     try {
       fs.chmodSync(preCommitPath, 0o755);
     } catch (chmodError) {
@@ -198,9 +209,8 @@ function runCommand(command: string, cwd: string): void {
 }
 
 function copyIECompatibilityPage(root: string): void {
-  const ieHtmlPath = path.join(
-    path.dirname(new URL(import.meta.url).pathname),
-    "../assets/html/ie.html",
+  const ieHtmlPath = fileURLToPath(
+    new URL("../assets/html/ie.html", import.meta.url)
   );
 
   let ieHtmlContent = "";
@@ -210,11 +220,8 @@ function copyIECompatibilityPage(root: string): void {
     console.error(error);
   }
 
-  // Ensure public directory exists
   const publicDir = path.join(root, "public");
-  if (!fs.existsSync(publicDir)) {
-    fs.mkdirSync(publicDir, { recursive: true });
-  }
+  ensureDirectory(publicDir);
 
   fs.writeFileSync(path.join(publicDir, "ie.html"), ieHtmlContent);
 }

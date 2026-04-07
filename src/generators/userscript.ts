@@ -1,6 +1,8 @@
-import fs from "node:fs";
-import path from "node:path";
 import { copyTemplateFiles, type TemplateFile } from "../utils/template.js";
+import {
+  removePaths,
+  updatePackageJson as applyPackageJsonUpdate,
+} from "../core/operations/files.js";
 
 const TEMPLATE_NAME = "userscript";
 
@@ -39,39 +41,33 @@ const DEFAULT_VITE_FILES = [
 export function createUserscriptFiles(root: string): void {
   removeDefaultViteFiles(root);
   copyTemplateFiles(TEMPLATE_NAME, TEMPLATE_FILES, root);
-  updatePackageJson(root);
+  updateUserscriptPackageJson(root);
 }
 
 function removeDefaultViteFiles(root: string): void {
-  for (const relativePath of DEFAULT_VITE_FILES) {
-    const targetPath = path.join(root, relativePath);
-    if (fs.existsSync(targetPath)) {
-      fs.rmSync(targetPath, { recursive: true, force: true });
-    }
-  }
+  removePaths(root, DEFAULT_VITE_FILES);
 }
 
-function updatePackageJson(root: string): void {
-  const pkgPath = path.join(root, "package.json");
-  const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
-
-  pkg.private = true;
-  pkg.type = "module";
-  pkg.description =
-    "Userscript starter powered by Vite, vite-plugin-monkey, and TypeScript";
-  pkg.scripts = {
-    dev: "vite",
-    build: "vite build",
-    typecheck: "tsc -b",
-  };
-  pkg.keywords = [
-    "userscript",
-    "tampermonkey",
-    "vanilla",
-    "vite",
-    "vite-plugin-monkey",
-    "typescript",
-  ];
-
-  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
+function updateUserscriptPackageJson(root: string): void {
+  applyPackageJsonUpdate<Record<string, unknown>>(root, (pkg) => ({
+    ...pkg,
+    private: true,
+    type: "module",
+    description:
+      "Userscript starter powered by Vite, vite-plugin-monkey, and TypeScript",
+    scripts: {
+      ...(typeof pkg.scripts === "object" && pkg.scripts ? pkg.scripts : {}),
+      dev: "vite",
+      build: "vite build",
+      typecheck: "tsc -b",
+    },
+    keywords: [
+      "userscript",
+      "tampermonkey",
+      "vanilla",
+      "vite",
+      "vite-plugin-monkey",
+      "typescript",
+    ],
+  }));
 }

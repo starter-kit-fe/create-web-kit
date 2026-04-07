@@ -1,51 +1,78 @@
-# 获取当前时间并格式化版本号
-VERSION := $(shell TZ="Asia/Shanghai" date +"%y.%m%d.%H%M")
-
-# 定义变量并增加默认值
-
-
-# 检查 npm 是否安装
-NPM := $(shell command -v npm 2> /dev/null)
-ifeq ($(strip $(NPM)),)
-$(error npm is not installed. Please install Node.js and npm)
+# 检查 pnpm 是否安装
+PNPM := $(shell command -v pnpm 2> /dev/null)
+ifeq ($(strip $(PNPM)),)
+$(error pnpm is not installed. Please install pnpm first)
 endif
 
-# 更新版本号，增加错误处理
-update-version:
-	@if [ -f "package.json" ]; then \
-		echo "Updating package.json version to $(VERSION)"; \
-		node -e "const fs = require('fs'); \
-			const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8')); \
-			pkg.version = '$(VERSION)'; \
-			fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));" || \
-		(echo "Failed to update package.json"; exit 1); \
-	else \
-		echo "package.json not found"; \
-		exit 1; \
-	fi
+help:
+	@echo "Common commands:"
+	@echo "  make ps      # list pending changesets"
+	@echo "  make add     # create a changeset"
+	@echo "  make check   # run release checks"
+	@echo "  make ver     # validate changesets and bump version"
+	@echo "  make dry     # dry-run publish"
+	@echo "  make pub     # publish and archive changesets"
+	@echo "  make ship    # publish, commit release files, and push tag"
+	@echo ""
+	@echo "Compatibility aliases:"
+	@echo "  make changeset changeset-status changeset-check update-version"
+	@echo "  make dry-run publish release"
 
-# 提交版本变更到Git
-push-version: update-version
-	@echo "Committing version change"
-	@git diff --quiet package.json || \
-		(git add . && \
-		git commit -m "bump version to v$(VERSION)" && \
+add:
+	@$(PNPM) run changeset
+
+ps:
+	@$(PNPM) run changeset:status
+
+check:
+	@$(PNPM) run release:check
+
+check-cs:
+	@$(PNPM) run changeset:check
+
+arc:
+	@$(PNPM) run changeset:archive
+
+ver: check-cs
+	@$(PNPM) run release:version
+
+commit-release:
+	@echo "Committing release changes"
+	@VERSION=$$($(PNPM) pkg get version | tr -d '"'); \
+		git diff --quiet package.json .changeset pnpm-lock.yaml || \
+		(git add package.json .changeset pnpm-lock.yaml && \
+		git commit -m "release v$$VERSION" && \
 		git push) || \
 		(echo "Git commit failed"; exit 1)
 
-# 创建并推送标签
-push-tag: push-version
-	@echo "Creating and pushing tag v$(VERSION)"
-	@git tag v$(VERSION) && \
-		git push origin v$(VERSION) || \
+tag: commit-release
+	@VERSION=$$($(PNPM) pkg get version | tr -d '"'); \
+		echo "Creating and pushing tag v$$VERSION"; \
+		git tag v$$VERSION && \
+		git push origin v$$VERSION || \
 		(echo "Failed to create and push tag"; exit 1)
 
-# 开发环境
 dev:
-	@$(NPM) run start
+	@$(PNPM) run start
 
-publish: update-version
-	@$(NPM) run build && npm publish
+pub: ver
+	@$(PNPM) run release:publish
+	@$(PNPM) run changeset:archive
 
+dry: ver
+	@$(PNPM) run release:dry-run
 
-.PHONY: update-version push-version push-tag dev build
+ship: pub commit-release tag
+
+changeset: add
+changeset-status: ps
+changeset-check: check-cs
+archive-changesets: arc
+update-version: ver
+push-version: commit-release
+push-tag: tag
+publish: pub
+dry-run: dry
+release: ship
+
+.PHONY: help add ps check check-cs arc ver commit-release tag dev pub dry ship changeset changeset-status changeset-check archive-changesets update-version push-version push-tag publish dry-run release

@@ -1,12 +1,7 @@
-#!/usr/bin/env node
+import test from "node:test";
+import assert from "node:assert/strict";
 
-/**
- * Test script to verify package manager replacement functionality
- */
-
-import { replacePackageManagerInCommand } from "./dist/utils/package-manager.js";
-
-console.log("🧪 Testing package manager replacement...\n");
+import { replacePackageManagerInCommand } from "../../../dist/utils/package-manager.js";
 
 const testCommands = [
   {
@@ -81,34 +76,11 @@ const packageManagers = [
   { label: "bun", name: "bun", version: "1.0.0" },
 ];
 
-let hasFailure = false;
-
-packageManagers.forEach((pkgInfo) => {
-  console.log(`📦 Testing with ${pkgInfo.name}@${pkgInfo.version}:`);
-
-  testCommands.forEach(({ command, expected }) => {
-    const replaced = replacePackageManagerInCommand(command, pkgInfo);
-    const expectedOutput = expected[pkgInfo.label];
-
-    console.log(`  Original: ${command}`);
-    console.log(`  Replaced: ${replaced}`);
-
-    if (replaced !== expectedOutput) {
-      console.log(`  ❌ Expected: ${expectedOutput}`);
-      hasFailure = true;
-    } else {
-      console.log("  ✅ Output matches expectation");
+for (const pkgInfo of packageManagers) {
+  test(`replacePackageManagerInCommand maps commands for ${pkgInfo.label}`, () => {
+    for (const { command, expected } of testCommands) {
+      const replaced = replacePackageManagerInCommand(command, pkgInfo);
+      assert.equal(replaced, expected[pkgInfo.label]);
     }
-
-    console.log();
   });
-
-  console.log("---\n");
-});
-
-if (hasFailure) {
-  console.log("❌ Package manager replacement test failed");
-  process.exit(1);
 }
-
-console.log("✅ Test completed!");
