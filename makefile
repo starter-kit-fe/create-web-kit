@@ -1,42 +1,114 @@
+.DEFAULT_GOAL := help
+
 # 检查 pnpm 是否安装
 PNPM := $(shell command -v pnpm 2> /dev/null)
 ifeq ($(strip $(PNPM)),)
 $(error pnpm is not installed. Please install pnpm first)
 endif
 
+NPM := $(shell command -v npm 2> /dev/null)
+ifeq ($(strip $(NPM)),)
+$(error npm is not installed. Please install npm first)
+endif
+
 help:
 	@echo "Common commands:"
 	@echo "  make ps      # list pending changesets"
-	@echo "  make add     # create a changeset"
+	@echo "  make new     # create a changeset (optional)"
+	@echo "  make build   # compile cli and copy templates/assets"
+	@echo "  make test    # run all tests"
 	@echo "  make check   # run release checks"
-	@echo "  make ver     # validate changesets and bump version"
+	@echo "  make up      # bump version from pending changesets if any"
 	@echo "  make dry     # dry-run publish"
-	@echo "  make pub     # publish and archive changesets"
-	@echo "  make ship    # publish, commit release files, and push tag"
+	@echo "  make pub     # publish"
+	@echo "  make push    # publish, commit release files, and push tag"
 	@echo ""
-	@echo "Compatibility aliases:"
-	@echo "  make changeset changeset-status changeset-check update-version"
-	@echo "  make dry-run publish release"
+	@echo "Recommended release flow:"
+	@echo "  make new     # optional, only if you want release notes"
+	@echo "  make dry     # optional but recommended"
+	@echo "  make pub"
 
-add:
-	@$(PNPM) run changeset
+new:
+	@$(PNPM) exec changeset
 
 ps:
-	@$(PNPM) run changeset:status
+	@files=$$(find .changeset -maxdepth 1 -type f -name '*.md' ! -name 'README.md' | sort); \
+		if [ -z "$$files" ]; then \
+			echo "No pending changesets."; \
+			exit 0; \
+		fi; \
+		echo "Pending changesets:"; \
+		for file in $$files; do echo "- $$file"; done
+
+build:
+	@$(PNPM) exec tsc -d --outDir dist
+	@rm -rf dist/templates dist/assets
+	@if [ -d src/templates ]; then mkdir -p dist/templates && cp -R src/templates/. dist/templates/; fi
+	@if [ -d src/assets ]; then mkdir -p dist/assets && cp -R src/assets/. dist/assets/; fi
+	@if [ -f dist/index.js ]; then chmod +x dist/index.js; fi
+	@echo "Build completed."
+
+typecheck:
+	@$(PNPM) exec tsc --noEmit
+
+test:
+	@$(MAKE) build
+	@files=$$(find tests -type f -name '*.test.mjs' | sort); \
+		if [ -z "$$files" ]; then \
+			echo "No test files found."; \
+			exit 0; \
+		fi; \
+		node --test $$files
+
+test-unit:
+	@$(MAKE) build
+	@files=$$(find tests/unit -type f -name '*.test.mjs' | sort); \
+		if [ -z "$$files" ]; then \
+			echo "No unit tests found."; \
+			exit 0; \
+		fi; \
+		node --test $$files
+
+test-integration:
+	@$(MAKE) build
+	@files=$$(find tests/integration -type f -name '*.test.mjs' | sort); \
+		if [ -z "$$files" ]; then \
+			echo "No integration tests found."; \
+			exit 0; \
+		fi; \
+		node --test $$files
 
 check:
-	@$(PNPM) run release:check
+	@$(MAKE) typecheck
+	@$(MAKE) test
+	@test -f package.json || (echo "package.json not found"; exit 1)
+	@test -f README.md || (echo "README.md not found"; exit 1)
+	@test -d dist || (echo "dist directory not found"; exit 1)
+	@test -f dist/index.js || (echo "dist/index.js not found"; exit 1)
+	@test -x dist/index.js || (echo "dist/index.js is not executable"; exit 1)
+	@echo "Release checks passed."
 
-check-cs:
-	@$(PNPM) run changeset:check
+_require_cs:
+	@files=$$(find .changeset -maxdepth 1 -type f -name '*.md' ! -name 'README.md' | sort); \
+		if [ -z "$$files" ]; then \
+			echo "No pending changesets found. Run 'make new' before 'make dry', 'make pub', or 'make push'."; \
+			exit 1; \
+		fi; \
+		echo "Pending changesets:"; \
+		for file in $$files; do echo "- $$file"; done
 
-arc:
-	@$(PNPM) run changeset:archive
+up:
+	@files=$$(find .changeset -maxdepth 1 -type f -name '*.md' ! -name 'README.md' | sort); \
+		if [ -z "$$files" ]; then \
+			VERSION=$$($(PNPM) pkg get version | tr -d '"'); \
+			echo "No pending changesets. Keeping version $$VERSION"; \
+			exit 0; \
+		fi; \
+		$(PNPM) exec changeset version; \
+		VERSION=$$($(PNPM) pkg get version | tr -d '"'); \
+		echo "Updated package.json version to $$VERSION"
 
-ver: check-cs
-	@$(PNPM) run release:version
-
-commit-release:
+_commit:
 	@echo "Committing release changes"
 	@VERSION=$$($(PNPM) pkg get version | tr -d '"'); \
 		git diff --quiet package.json .changeset pnpm-lock.yaml || \
@@ -45,7 +117,7 @@ commit-release:
 		git push) || \
 		(echo "Git commit failed"; exit 1)
 
-tag: commit-release
+_tag: _commit
 	@VERSION=$$($(PNPM) pkg get version | tr -d '"'); \
 		echo "Creating and pushing tag v$$VERSION"; \
 		git tag v$$VERSION && \
@@ -53,26 +125,16 @@ tag: commit-release
 		(echo "Failed to create and push tag"; exit 1)
 
 dev:
-	@$(PNPM) run start
+	@node dist/index.js
 
-pub: ver
-	@$(PNPM) run release:publish
-	@$(PNPM) run changeset:archive
+pub: up
+	@$(MAKE) check
+	@$(NPM) publish
 
-dry: ver
-	@$(PNPM) run release:dry-run
+dry: up
+	@$(MAKE) check
+	@$(NPM) publish --dry-run
 
-ship: pub commit-release tag
+push: pub _commit _tag
 
-changeset: add
-changeset-status: ps
-changeset-check: check-cs
-archive-changesets: arc
-update-version: ver
-push-version: commit-release
-push-tag: tag
-publish: pub
-dry-run: dry
-release: ship
-
-.PHONY: help add ps check check-cs arc ver commit-release tag dev pub dry ship changeset changeset-status changeset-check archive-changesets update-version push-version push-tag publish dry-run release
+.PHONY: help new ps build typecheck test test-unit test-integration check up dry pub push dev _require_cs _commit _tag

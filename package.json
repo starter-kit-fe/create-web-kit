@@ -1,6 +1,6 @@
 {
   "name": "create-web-kit",
-  "version": "26.407.1134",
+  "version": "26.407.1452",
   "description": "A powerful scaffolding tool for creating modern frontend projects with Vue, Next.js, and Electron templates",
   "type": "module",
   "bin": {
@@ -13,23 +13,9 @@
     "node": "^18.0.0 || >=20.0.0"
   },
   "scripts": {
-    "build": "tsc -d --outDir dist && node scripts/copy-templates.mjs",
+    "build": "make build",
     "dev": "pnpx tsx src/index.ts",
-    "start": "node dist/index.js",
-    "typecheck": "tsc --noEmit",
-    "lint": "tsc --noEmit",
-    "test": "tsc -d --outDir dist && node scripts/copy-templates.mjs && node scripts/testing/run-node-tests.mjs",
-    "test:unit": "tsc -d --outDir dist && node scripts/copy-templates.mjs && node scripts/testing/run-node-tests.mjs unit",
-    "test:integration": "tsc -d --outDir dist && node scripts/copy-templates.mjs && node scripts/testing/run-node-tests.mjs integration",
-    "release:check": "pnpm run typecheck && pnpm run test && node scripts/pre-publish.mjs",
-    "release:version": "node scripts/release/update-version.mjs",
-    "release:dry-run": "pnpm run release:check && npm publish --dry-run",
-    "release:publish": "pnpm run release:check && npm publish",
-    "prepublishOnly": "pnpm run release:check",
-    "changeset": "changeset",
-    "changeset:status": "changeset status --verbose",
-    "changeset:check": "node scripts/release/assert-changesets.mjs",
-    "changeset:archive": "node scripts/release/archive-changesets.mjs"
+    "start": "node dist/index.js"
   },
   "keywords": [
     "scaffolding",

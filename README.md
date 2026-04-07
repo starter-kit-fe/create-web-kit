@@ -174,7 +174,7 @@ src/
 ```bash
 pnpm install
 pnpm run dev
-pnpm run build
+make build
 pnpm start
 ```
 
@@ -182,9 +182,9 @@ pnpm start
 
 ```bash
 pnpm run typecheck
-pnpm run test
-pnpm run test:unit
-pnpm run test:integration
+make test
+make test-unit
+make test-integration
 ```
 
 当你修改某个 variant、generator 或模板文件时，除了跑测试，最好再实际执行一次 CLI，确认生成出来的项目结构和脚本都符合预期。
@@ -194,52 +194,61 @@ pnpm run test:integration
 ```bash
 pnpm run changeset
 pnpm run changeset:status
-pnpm run changeset:check
-pnpm run changeset:archive
-pnpm run release:check
-pnpm run release:dry-run
-pnpm run release:publish
+make check
+make dry
+make pub
 ```
 
-这个仓库已经接入了 Changesets，用来记录发布意图和变更说明，同时保留了当前基于时间戳的 semver 兼容版本策略。
+这个仓库已经接入了 Changesets，用来记录发布意图和变更说明。
 
-当前仓库仍保留基于时间戳的 `release:version` 版本脚本，因此推荐的发布流程是：
+推荐的发布流程是：
 
-1. 先运行 `pnpm run changeset` 记录本次变更说明
-2. 运行 `pnpm run changeset:check` 确认存在待发布 changeset
-3. 再运行 `pnpm run release:version` 更新发布版本号
-4. 执行 `pnpm run release:dry-run`
-5. 确认无误后执行 `pnpm run release:publish`
-6. 发布成功后运行 `pnpm run changeset:archive`
+1. 如果你想记录发布说明，先运行 `pnpm run changeset`
+2. 再运行 `make dry`
+3. 确认无误后执行 `make pub` 或 `make push`
 
 如果你更喜欢用 `make`，现在也可以直接使用：
 
 ```bash
 make ps
-make add
+make new
 make check
+make up
 make dry
 make pub
-make ship
+make push
 ```
+
+推荐顺序：
+
+```bash
+make dry
+make pub
+```
+
+如果你想附带 changeset 发布说明：
+
+```bash
+make new
+make ps
+make dry
+make pub
+```
+
+注意：
+
+- `make new` 不是 `make dry`、`make pub`、`make push` 的前置步骤，它只是可选的发布说明记录。
+- 如果你想确认当前有没有待发布项，直接运行 `make ps`。
 
 其中：
 
-- `make ps`：查看当前待发布 changeset 列表
-- `make add`：创建一条新的 changeset
+- `make ps`：查看当前待发布 changeset 列表；如果没有待发布项，会直接显示空列表
+- `make new`：创建一条新的 changeset
 - `make check`：执行完整发布前检查
-- `make dry`：校验 changeset、更新版本号，再执行 `npm publish --dry-run`
-- `make pub`：执行正式发布并自动归档已消费的 changeset
-- `make ship`：串行执行发布、提交发布改动并推送 tag
-
-如果你已经习惯旧命令，兼容别名仍然保留，例如：
-
-```bash
-make changeset-status
-make dry-run
-make publish
-make release
-```
+- `make up`：如果有 pending changeset，就使用 `changeset version` 更新时间版本；如果没有，就保持当前版本
+- `make dry`：更新时间版本后执行 `npm publish --dry-run`
+- `make pub`：正式发布
+- `make push`：发布后继续提交发布改动并推送 tag
 
 ## 如何扩展新的搭建 Flow
 
