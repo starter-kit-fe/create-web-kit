@@ -181,7 +181,6 @@ pnpm start
 ### 测试与验证
 
 ```bash
-pnpm run typecheck
 make test
 make test-unit
 make test-integration
@@ -193,7 +192,6 @@ make test-integration
 
 ```bash
 pnpm run changeset
-pnpm run changeset:status
 make check
 make dry
 make pub

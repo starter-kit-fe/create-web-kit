@@ -41,8 +41,8 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      - name: Typecheck
-        run: pnpm run typecheck
+      - name: Lint
+        run: pnpm run lint
 
-      - name: Test
-        run: node scripts/testing/run-node-tests.mjs
+      - name: Check
+        run: pnpm run check

@@ -17,6 +17,7 @@ help:
 	@echo "  make changeset # create a changeset and git add it"
 	@echo "  make new     # create a changeset (optional)"
 	@echo "  make build   # compile cli and copy templates/assets"
+	@echo "  make lint    # run lint checks"
 	@echo "  make test    # run all tests"
 	@echo "  make check   # run release checks"
 	@echo "  make up      # bump version from pending changesets if any"
@@ -62,6 +63,9 @@ build:
 
 typecheck:
 	@$(PNPM) exec tsc --noEmit
+
+lint: typecheck
+	@:
 
 test:
 	@$(MAKE) build
@@ -109,7 +113,7 @@ _require_cs:
 		echo "Pending changesets:"; \
 		for file in $$files; do echo "- $$file"; done
 
-up:
+up: new
 	@files=$$(find .changeset -maxdepth 1 -type f -name '*.md' ! -name 'README.md' | sort); \
 		if [ -z "$$files" ]; then \
 			VERSION=$$($(PNPM) pkg get version | tr -d '"'); \
@@ -149,4 +153,4 @@ dry: up
 
 push: pub _commit _tag
 
-.PHONY: help changeset new ps build typecheck test test-unit test-integration check up dry pub push dev _require_cs _commit _tag
+.PHONY: help changeset new ps build typecheck lint test test-unit test-integration check up dry pub push dev _require_cs _commit _tag
