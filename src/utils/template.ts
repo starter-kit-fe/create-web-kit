@@ -19,11 +19,42 @@ export function readTemplateFile(
   templatePath: string,
   fileName: string
 ): string {
-  const filePath = path.join(templatePath, fileName);
-  if (!fs.existsSync(filePath)) {
-    throw new Error(`Template file not found: ${filePath}`);
+  const candidatePaths = resolveTemplateFileCandidates(templatePath, fileName);
+
+  for (const filePath of candidatePaths) {
+    if (fs.existsSync(filePath)) {
+      return fs.readFileSync(filePath, "utf-8");
+    }
   }
-  return fs.readFileSync(filePath, "utf-8");
+
+  throw new Error(`Template file not found: ${candidatePaths[0]}`);
+}
+
+function resolveTemplateFileCandidates(
+  templatePath: string,
+  fileName: string
+): string[] {
+  const candidates = [path.join(templatePath, fileName)];
+  const dirname = path.dirname(fileName);
+  const basename = path.basename(fileName);
+
+  if (!basename.startsWith(".") || basename.length === 1) {
+    return candidates;
+  }
+
+  const aliasNames = [
+    basename.slice(1),
+    `_${basename.slice(1)}`,
+    basename === ".gitignore" ? ".npmignore" : null,
+  ].filter((value): value is string => Boolean(value));
+
+  const relativeDir = dirname === "." ? "" : dirname;
+
+  for (const aliasName of aliasNames) {
+    candidates.push(path.join(templatePath, relativeDir, aliasName));
+  }
+
+  return candidates;
 }
 
 export function copyTemplateFiles(
