@@ -173,7 +173,7 @@ src/
 
 ```bash
 pnpm install
-pnpm run dev
+make dev
 make build
 pnpm start
 ```
@@ -181,9 +181,8 @@ pnpm start
 ### 测试与验证
 
 ```bash
-make test
-make test-unit
-make test-integration
+pnpm run lint
+pnpm run check
 ```
 
 当你修改某个 variant、generator 或模板文件时，除了跑测试，最好再实际执行一次 CLI，确认生成出来的项目结构和脚本都符合预期。
@@ -191,64 +190,24 @@ make test-integration
 ### 发布与版本管理
 
 ```bash
-pnpm run changeset
-make check
-make dry
-make pub
+make deploy
 ```
 
-这个仓库已经接入了 Changesets，用来记录发布意图和变更说明。
+这个仓库的发布入口现在只保留一个：`make deploy`。
 
-推荐的发布流程是：
+它会按下面的顺序执行：
 
-1. 如果你想记录发布说明，先运行 `pnpm run changeset`
-2. 再运行 `make dry`
-3. 确认无误后执行 `make pub` 或 `make push`
+1. 先把当前工作区改动提交成一次普通 commit
+2. 交互式生成 changeset
+3. 执行 `changeset version`，消费 changeset 并更新 `package.json`、`CHANGELOG.md`
+4. 执行 `pnpm run check`
+5. 提交 release 改动，然后执行 `git push` 和 `npm publish`
 
-如果你更喜欢用 `make`，现在也可以直接使用：
+如果你想自定义 commit message，可以在执行时传环境变量：
 
 ```bash
-make ps
-make changeset
-make new
-make check
-make up
-make dry
-make pub
-make push
+make deploy MSG="feat: improve generator flow" RELEASE_MSG="release v26.408.1"
 ```
-
-推荐顺序：
-
-```bash
-make dry
-make pub
-```
-
-如果你想附带 changeset 发布说明：
-
-```bash
-make changeset
-make ps
-make dry
-make pub
-```
-
-注意：
-
-- `make new` 不是 `make dry`、`make pub`、`make push` 的前置步骤，它只是可选的发布说明记录。
-- 如果你想确认当前有没有待发布项，直接运行 `make ps`。
-
-其中：
-
-- `make ps`：查看当前待发布 changeset 列表；如果没有待发布项，会直接显示空列表
-- `make changeset`：创建一条 changeset，并自动 `git add` 新的 `.changeset/*.md`
-- `make new`：创建一条新的 changeset
-- `make check`：执行完整发布前检查
-- `make up`：如果有 pending changeset，就使用 `changeset version` 更新时间版本；如果没有，就保持当前版本
-- `make dry`：更新时间版本后执行 `npm publish --dry-run`
-- `make pub`：正式发布
-- `make push`：发布后继续提交发布改动并推送 tag
 
 ## 如何扩展新的搭建 Flow
 

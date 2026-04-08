@@ -1,6 +1,3 @@
-.DEFAULT_GOAL := help
-
-# 检查 pnpm 是否安装
 PNPM := $(shell command -v pnpm 2> /dev/null)
 ifeq ($(strip $(PNPM)),)
 $(error pnpm is not installed. Please install pnpm first)
@@ -11,47 +8,9 @@ ifeq ($(strip $(NPM)),)
 $(error npm is not installed. Please install npm first)
 endif
 
-help:
-	@echo "Common commands:"
-	@echo "  make ps      # list pending changesets"
-	@echo "  make changeset # create a changeset and git add it"
-	@echo "  make new     # create a changeset (optional)"
-	@echo "  make build   # compile cli and copy templates/assets"
-	@echo "  make lint    # run lint checks"
-	@echo "  make test    # run all tests"
-	@echo "  make check   # run release checks"
-	@echo "  make up      # bump version from pending changesets if any"
-	@echo "  make dry     # dry-run publish"
-	@echo "  make pub     # publish"
-	@echo "  make push    # publish, commit release files, and push tag"
-	@echo ""
-	@echo "Recommended release flow:"
-	@echo "  make changeset # optional, only if you want release notes"
-	@echo "  make dry     # optional but recommended"
-	@echo "  make pub"
-
-changeset:
-	@$(PNPM) exec changeset
-	@files=$$(find .changeset -maxdepth 1 -type f -name '*.md' ! -name 'README.md' | sort); \
-		if [ -z "$$files" ]; then \
-			echo "No pending changesets."; \
-			exit 0; \
-		fi; \
-		git add $$files; \
-		echo "Staged changesets:"; \
-		for file in $$files; do echo "- $$file"; done
-
-new: changeset
-	@:
-
-ps:
-	@files=$$(find .changeset -maxdepth 1 -type f -name '*.md' ! -name 'README.md' | sort); \
-		if [ -z "$$files" ]; then \
-			echo "No pending changesets."; \
-			exit 0; \
-		fi; \
-		echo "Pending changesets:"; \
-		for file in $$files; do echo "- $$file"; done
+dev:
+	@$(MAKE) build
+	@node dist/index.js
 
 build:
 	@$(PNPM) exec tsc -d --outDir dist
@@ -61,13 +20,11 @@ build:
 	@if [ -f dist/index.js ]; then chmod +x dist/index.js; fi
 	@echo "Build completed."
 
-typecheck:
+lint:
 	@$(PNPM) exec tsc --noEmit
 
-lint: typecheck
-	@:
-
-test:
+check:
+	@$(MAKE) lint
 	@$(MAKE) build
 	@files=$$(find tests -type f -name '*.test.mjs' | sort); \
 		if [ -z "$$files" ]; then \
@@ -75,28 +32,6 @@ test:
 			exit 0; \
 		fi; \
 		node --test $$files
-
-test-unit:
-	@$(MAKE) build
-	@files=$$(find tests/unit -type f -name '*.test.mjs' | sort); \
-		if [ -z "$$files" ]; then \
-			echo "No unit tests found."; \
-			exit 0; \
-		fi; \
-		node --test $$files
-
-test-integration:
-	@$(MAKE) build
-	@files=$$(find tests/integration -type f -name '*.test.mjs' | sort); \
-		if [ -z "$$files" ]; then \
-			echo "No integration tests found."; \
-			exit 0; \
-		fi; \
-		node --test $$files
-
-check:
-	@$(MAKE) typecheck
-	@$(MAKE) test
 	@test -f package.json || (echo "package.json not found"; exit 1)
 	@test -f README.md || (echo "README.md not found"; exit 1)
 	@test -d dist || (echo "dist directory not found"; exit 1)
@@ -104,53 +39,36 @@ check:
 	@test -x dist/index.js || (echo "dist/index.js is not executable"; exit 1)
 	@echo "Release checks passed."
 
-_require_cs:
-	@files=$$(find .changeset -maxdepth 1 -type f -name '*.md' ! -name 'README.md' | sort); \
-		if [ -z "$$files" ]; then \
-			echo "No pending changesets found. Run 'make new' before 'make dry', 'make pub', or 'make push'."; \
+deploy:
+	@commit_message=$${MSG:-chore: prepare release}; \
+		if [ -n "$$(git status --porcelain)" ]; then \
+			git add -A && git commit -m "$$commit_message"; \
+		else \
+			echo "No working tree changes to commit before release."; \
+		fi
+	@previous_version=$$($(PNPM) pkg get version | tr -d '"'); \
+		$(PNPM) exec changeset; \
+		changesets=$$(find .changeset -maxdepth 1 -type f -name '*.md' ! -name 'README.md' | sort); \
+		if [ -z "$$changesets" ]; then \
+			echo "No pending changesets found. Deploy stopped."; \
 			exit 1; \
 		fi; \
-		echo "Pending changesets:"; \
-		for file in $$files; do echo "- $$file"; done
-
-up: new
-	@files=$$(find .changeset -maxdepth 1 -type f -name '*.md' ! -name 'README.md' | sort); \
-		if [ -z "$$files" ]; then \
-			VERSION=$$($(PNPM) pkg get version | tr -d '"'); \
-			echo "No pending changesets. Keeping version $$VERSION"; \
-			exit 0; \
-		fi; \
 		$(PNPM) exec changeset version; \
-		VERSION=$$($(PNPM) pkg get version | tr -d '"'); \
-		echo "Updated package.json version to $$VERSION"
+		next_version=$$($(PNPM) pkg get version | tr -d '"'); \
+		if [ "$$previous_version" = "$$next_version" ]; then \
+			echo "Version did not change after 'changeset version'. Deploy stopped."; \
+			exit 1; \
+		fi; \
+		echo "Version updated: $$previous_version -> $$next_version"
+	@$(PNPM) run check
+	@release_message=$${RELEASE_MSG:-release v$$($(PNPM) pkg get version | tr -d '"')}; \
+		if [ -z "$$(git status --porcelain)" ]; then \
+			echo "No release artifacts to commit. Deploy stopped."; \
+			exit 1; \
+		fi; \
+		git add -A && \
+		git commit -m "$$release_message" && \
+		git push && \
+		$(NPM) publish
 
-_commit:
-	@echo "Committing release changes"
-	@VERSION=$$($(PNPM) pkg get version | tr -d '"'); \
-		git diff --quiet package.json .changeset pnpm-lock.yaml || \
-		(git add package.json .changeset pnpm-lock.yaml && \
-		git commit -m "release v$$VERSION" && \
-		git push) || \
-		(echo "Git commit failed"; exit 1)
-
-_tag: _commit
-	@VERSION=$$($(PNPM) pkg get version | tr -d '"'); \
-		echo "Creating and pushing tag v$$VERSION"; \
-		git tag v$$VERSION && \
-		git push origin v$$VERSION || \
-		(echo "Failed to create and push tag"; exit 1)
-
-dev:
-	@node dist/index.js
-
-pub: up
-	@$(MAKE) check
-	@$(NPM) publish
-
-dry: up
-	@$(MAKE) check
-	@$(NPM) publish --dry-run
-
-push: pub _commit _tag
-
-.PHONY: help changeset new ps build typecheck lint test test-unit test-integration check up dry pub push dev _require_cs _commit _tag
+.PHONY: dev build lint check deploy
