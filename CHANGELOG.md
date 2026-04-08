@@ -1,5 +1,11 @@
 # create-web-kit
 
+## 26.409.1
+
+### Patch Changes
+
+- 修复 userscript 新增错误问题
+
 ## 26.409.0
 
 ### Minor Changes
