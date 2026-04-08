@@ -1,0 +1,32 @@
+---
+import { getEntryBySlug } from "astro:content";
+import SiteLayout from "../layouts/site-layout.astro";
+import "../styles/global.css";
+
+const home = await getEntryBySlug("pages", "home");
+
+if (!home) {
+  throw new Error('Missing "pages/home" content entry.');
+}
+
+const { Content } = await home.render();
+---
+
+<SiteLayout title={home.data.title} description={home.data.description}>
+  <main class="page-shell">
+    <section class="hero">
+      {home.data.eyebrow && <p class="eyebrow">{home.data.eyebrow}</p>}
+      <h1>{home.data.title}</h1>
+      <p class="description">{home.data.description}</p>
+      <div class="cta-row">
+        <a class="primary-cta" href={home.data.ctaHref ?? "/"}>
+          {home.data.ctaLabel ?? "Start editing"}
+        </a>
+      </div>
+    </section>
+
+    <section class="content-card">
+      <Content />
+    </section>
+  </main>
+</SiteLayout>

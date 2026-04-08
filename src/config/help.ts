@@ -4,12 +4,18 @@ import { REGISTRY_VARIANTS } from "../registry/index.js";
 const { blue, cyan, green, yellow } = colors;
 
 const colorByTemplateId: Record<string, (text: string) => string> = {
+  "astro-content": blue,
+  "astro-blog": blue,
+  "browser-extension-react": yellow,
+  "react-vite": cyan,
   "nextjs-csr": cyan,
   "nextjs-ssr": blue,
+  nuxt3: green,
   vue3: green,
   "electron-react": cyan,
   "electron-vue": green,
   userscript: yellow,
+  "wxt-react": yellow,
 };
 
 export function createHelpMessage(): string {

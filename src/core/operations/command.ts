@@ -37,6 +37,20 @@ function executeCommandString(
   }
 }
 
+function applyOperationPlaceholders(
+  command: string,
+  context: ProjectContext
+): string {
+  return command
+    .replace(/TARGET_DIR/g, context.targetDir)
+    .replace(/PACKAGE_MANAGER/g, context.pkgManager)
+    .replace(/INSTALL_FLAG/g, context.noInstall ? "" : "--install")
+    .replace(/GIT_FLAG/g, context.noGit ? "" : "--git")
+    .replace(/GIT_INIT_FLAG/g, context.noGit ? "" : "--gitInit")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function runOperation(
   operation: VariantOperation,
   context: ProjectContext
@@ -46,11 +60,10 @@ export function runOperation(
 
   switch (operation.kind) {
     case "command": {
+      const baseCommand = applyOperationPlaceholders(operation.command, context);
       const command = operation.packageManagerAware === false
-        ? operation.command
-        : adapter.replaceInCommand(
-            operation.command.replace(/TARGET_DIR/g, context.targetDir)
-          );
+        ? baseCommand
+        : adapter.replaceInCommand(baseCommand);
       context.logger.debug(
         `Executing command operation in ${operation.workingDir ?? "target"}: ${command}`
       );
@@ -62,9 +75,10 @@ export function runOperation(
       if (context.noGit && operation.disableGitArg) {
         args.push(operation.disableGitArg);
       }
-      const command = adapter
-        .create(operation.packageName, ["TARGET_DIR", ...args])
-        .replace(/TARGET_DIR/g, context.targetDir);
+      const command = applyOperationPlaceholders(
+        adapter.create(operation.packageName, ["TARGET_DIR", ...args]),
+        context
+      );
       context.logger.debug(
         `Executing create operation in ${operation.workingDir ?? "root"}: ${command}`
       );
@@ -72,9 +86,10 @@ export function runOperation(
       return;
     }
     case "dlx": {
-      const command = adapter
-        .dlx(operation.packageName, operation.args)
-        .replace(/TARGET_DIR/g, context.targetDir);
+      const command = applyOperationPlaceholders(
+        adapter.dlx(operation.packageName, operation.args),
+        context
+      );
       context.logger.debug(
         `Executing dlx operation in ${operation.workingDir ?? "target"}: ${command}`
       );
@@ -102,9 +117,10 @@ export function runCustomCommand(
   customCommand: string,
   context: ProjectContext
 ): void {
-  const command = createPackageManagerAdapter(context.pkgInfo)
-    .getFullCustomCommand(customCommand)
-    .replace(/TARGET_DIR/g, context.targetDir);
+  const command = applyOperationPlaceholders(
+    createPackageManagerAdapter(context.pkgInfo).getFullCustomCommand(customCommand),
+    context
+  );
   context.logger.debug(`Executing custom command: ${command}`);
   executeCommandString(command, context, "root");
 }

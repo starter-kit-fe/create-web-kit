@@ -58,11 +58,17 @@ Create Web Kit 更偏向下面这套思路：
 
 | Variant | 基于官方命令 | 典型增强内容 |
 | --- | --- | --- |
+| `astro-content` | `create-astro` | 内容站/官网默认首页、content collection、MDX/sitemap 起点、Prettier、环境变量示例 |
+| `react-vite` | `create-vite` | React SPA、shadcn/ui、TanStack Query/Table、Prettier、Husky、lint-staged、请求封装、Vite 环境变量示例 |
 | `nextjs-csr` | `create-next-app` | Shadcn UI、TanStack Query/Table、Prettier、Husky、lint-staged、环境变量、providers、请求封装、构建信息组件等 |
 | `nextjs-ssr` | `create-next-app` | Shadcn UI、React Query、NextAuth、Prisma、SSR 环境变量示例 |
 | `vue3` | `create-vue` | Pinia、`@vueuse/core`、开发依赖、Vite 配置补充 |
+| `nuxt3` | `create-nuxt` | Nuxt UI、Pinia、VueUse、runtime config、基础 API route、Prettier |
 | `electron-react` | `create electron-vite` | React + TypeScript 初始化、常用状态/请求依赖、ESLint 配置补充 |
 | `electron-vue` | `create electron-vite` | Vue 3 + TypeScript 初始化、Pinia、`@vueuse/core`、ESLint 配置补充 |
+| `browser-extension-react` | `wxt init` | Browser Extension React 默认入口名、Manifest V3、popup/options/content/background、Prettier、Husky |
+| `wxt-react` | `wxt init` | Browser Extension Manifest V3、popup/options/content/background 入口、Prettier、Husky、lint-staged |
+| `astro-blog` | `create-astro` | 官方 Blog 内容结构、MDX/SEO/RSS/sitemap 起点、Prettier、环境变量示例 |
 | `userscript` | `create-monkey` | Vanilla TypeScript userscript、`@types/tampermonkey`、Makefile、Vite 默认文件清理、userscript 约定文件 |
 
 其中最重要的不是“支持了哪些框架”，而是每个 variant 都代表一条已经整理好的搭建 flow。
@@ -85,6 +91,12 @@ npx create-web-kit my-project
 
 ```bash
 npx create-web-kit my-project --template nextjs-csr
+npx create-web-kit my-project --template react-vite
+npx create-web-kit my-project --template nuxt3
+npx create-web-kit my-project --template browser-extension-react
+npx create-web-kit my-project --template wxt-react
+npx create-web-kit my-project --template astro-content
+npx create-web-kit my-project --template astro-blog
 ```
 
 ### 非交互模式
@@ -121,7 +133,13 @@ npx create-web-kit --help
 
 ```bash
 npx create-web-kit admin-panel --template nextjs-csr
+npx create-web-kit ops-console --template react-vite
 npx create-web-kit content-site --template nextjs-ssr
+npx create-web-kit company-site --template astro-content
+npx create-web-kit creator-site --template astro-blog
+npx create-web-kit member-portal --template nuxt3
+npx create-web-kit browser-assistant --template browser-extension-react
+npx create-web-kit browser-sidekick --template wxt-react
 npx create-web-kit chrome-helper --template userscript
 npx create-web-kit landing-page --template vue3 --yes
 ```

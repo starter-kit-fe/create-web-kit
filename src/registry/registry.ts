@@ -1,12 +1,18 @@
 import colors from "picocolors";
 import type { VariantDefinition } from "../core/contracts.js";
 import {
+  astroContentVariantDefinition,
+  astroBlogVariantDefinition,
+  browserExtensionReactVariantDefinition,
   electronReactVariantDefinition,
   electronVueVariantDefinition,
   nextjsCsrVariantDefinition,
   nextjsSsrVariantDefinition,
+  nuxt3VariantDefinition,
+  reactViteVariantDefinition,
   USERSCRIPT_VARIANT,
   vue3VariantDefinition,
+  wxtReactVariantDefinition,
 } from "../variants/index.js";
 import type {
   FrameworkMeta,
@@ -17,7 +23,7 @@ import type {
   VariantSetupMode,
 } from "./types.js";
 
-const { cyan, green, magenta, yellow } = colors;
+const { blue, cyan, green, magenta, yellow } = colors;
 const EMPTY_VARIANTS: readonly VariantMeta[] = Object.freeze([]);
 
 const FRAMEWORK_SOURCES = Object.freeze([
@@ -27,8 +33,18 @@ const FRAMEWORK_SOURCES = Object.freeze([
     color: cyan,
   }),
   Object.freeze({
+    id: "react",
+    displayName: "React",
+    color: cyan,
+  }),
+  Object.freeze({
     id: "vue",
     displayName: "Vue",
+    color: green,
+  }),
+  Object.freeze({
+    id: "nuxt",
+    displayName: "Nuxt",
     color: green,
   }),
   Object.freeze({
@@ -37,19 +53,35 @@ const FRAMEWORK_SOURCES = Object.freeze([
     color: magenta,
   }),
   Object.freeze({
+    id: "browser-extension",
+    displayName: "Browser Extension",
+    color: yellow,
+  }),
+  Object.freeze({
     id: "userscript",
     displayName: "Userscript",
     color: yellow,
   }),
+  Object.freeze({
+    id: "astro",
+    displayName: "Astro",
+    color: blue,
+  }),
 ] as const satisfies readonly FrameworkSource[]);
 
 const STRUCTURED_VARIANT_SOURCES = Object.freeze([
+  astroContentVariantDefinition,
+  astroBlogVariantDefinition,
+  browserExtensionReactVariantDefinition,
   electronReactVariantDefinition,
   electronVueVariantDefinition,
   nextjsCsrVariantDefinition,
   nextjsSsrVariantDefinition,
+  nuxt3VariantDefinition,
+  reactViteVariantDefinition,
   USERSCRIPT_VARIANT,
   vue3VariantDefinition,
+  wxtReactVariantDefinition,
 ] as const satisfies readonly VariantDefinition[]);
 
 function inferSetupMode(variant: VariantDefinition): VariantSetupMode {
