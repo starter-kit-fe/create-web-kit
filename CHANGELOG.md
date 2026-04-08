@@ -1,5 +1,11 @@
 # create-web-kit
 
+## 26.409.0
+
+### Minor Changes
+
+- 新增四种类型 workflow
+
 ## 26.408.1
 
 ### Patch Changes
