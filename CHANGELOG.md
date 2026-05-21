@@ -1,5 +1,11 @@
 # create-web-kit
 
+## 26.409.2
+
+### Patch Changes
+
+- update electron
+
 ## 26.409.1
 
 ### Patch Changes
