@@ -37,7 +37,8 @@ export function createPackageManagerAdapter(
     if (name === "pnpm") {
       return joinCommandSegments(["pnpm", "create", packageName, ...args]);
     }
-    return joinCommandSegments(["npm", "create", packageName, ...args]);
+    const npmArgs = args.some((arg) => arg.startsWith("-")) ? ["--", ...args] : args;
+    return joinCommandSegments(["npm", "create", packageName, ...npmArgs]);
   };
 
   const dlx = (packageName: string, args: string[] = []) => {
