@@ -12,7 +12,7 @@ Create Web Kit 的核心就是把这类高频、重复、可标准化的初始�
 Create Web Kit 默认不维护一整套庞大的自定义模板，而是围绕下面这个模型工作：
 
 1. 先调用官方脚手架
-   比如 `create-next-app`、`create-vue`、`create-monkey`、`electron-vite`。
+   比如 `create-next-app`、`create-vue`、`create-monkey`、`create @quick-start/electron`。
 2. 再执行该方案对应的增强步骤
    比如安装 UI 库、数据层、工程化依赖，或者执行额外的初始化命令。
 3. 最后补少量增量文件和配置
@@ -64,8 +64,8 @@ Create Web Kit 更偏向下面这套思路：
 | `nextjs-ssr` | `create-next-app` | Shadcn UI、React Query、NextAuth、Prisma、SSR 环境变量示例 |
 | `vue3` | `create-vue` | Pinia、`@vueuse/core`、开发依赖、Vite 配置补充 |
 | `nuxt3` | `create-nuxt` | Nuxt UI、Pinia、VueUse、runtime config、基础 API route、Prettier |
-| `electron-react` | `create electron-vite` | React + TypeScript 初始化、常用状态/请求依赖、ESLint 配置补充 |
-| `electron-vue` | `create electron-vite` | Vue 3 + TypeScript 初始化、Pinia、`@vueuse/core`、ESLint 配置补充 |
+| `electron-react` | `create @quick-start/electron` | Electron + React + TypeScript 初始化、常用状态/请求依赖、ESLint/Prettier 配置补充 |
+| `electron-vue` | `create @quick-start/electron` | Electron + Vue 3 + TypeScript 初始化、Pinia、`@vueuse/core`、ESLint/Prettier 配置补充 |
 | `browser-extension-react` | `wxt init` | Browser Extension React 默认入口名、Manifest V3、popup/options/content/background、Prettier、Husky |
 | `wxt-react` | `wxt init` | Browser Extension Manifest V3、popup/options/content/background 入口、Prettier、Husky、lint-staged |
 | `astro-blog` | `create-astro` | 官方 Blog 内容结构、MDX/SEO/RSS/sitemap 起点、Prettier、环境变量示例 |
@@ -97,6 +97,8 @@ npx create-web-kit my-project --template browser-extension-react
 npx create-web-kit my-project --template wxt-react
 npx create-web-kit my-project --template astro-content
 npx create-web-kit my-project --template astro-blog
+npx create-web-kit my-project --template electron-react
+npx create-web-kit my-project --template electron-vue
 ```
 
 ### 非交互模式
@@ -141,6 +143,8 @@ npx create-web-kit member-portal --template nuxt3
 npx create-web-kit browser-assistant --template browser-extension-react
 npx create-web-kit browser-sidekick --template wxt-react
 npx create-web-kit chrome-helper --template userscript
+npx create-web-kit desktop-shell --template electron-react
+npx create-web-kit desktop-vue --template electron-vue
 npx create-web-kit landing-page --template vue3 --yes
 ```
 

@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import spawn from "cross-spawn";
 import type { ProjectContext } from "../context.js";
 import type {
@@ -16,7 +18,13 @@ function getWorkingDirectory(
   context: ProjectContext,
   workingDir: WorkingDirectory = "target"
 ): string {
-  return workingDir === "root" ? context.cwd : context.root;
+  if (workingDir === "root") {
+    return context.cwd;
+  }
+  if (workingDir === "target-parent") {
+    return path.dirname(context.root);
+  }
+  return context.root;
 }
 
 function executeCommandString(
@@ -24,9 +32,14 @@ function executeCommandString(
   context: ProjectContext,
   workingDir: WorkingDirectory = "target"
 ): void {
+  const cwd = getWorkingDirectory(context, workingDir);
+  if (workingDir === "target-parent") {
+    fs.mkdirSync(cwd, { recursive: true });
+  }
+
   const [cmd, ...args] = splitCommand(command);
   const result = spawn.sync(cmd, args, {
-    cwd: getWorkingDirectory(context, workingDir),
+    cwd,
     stdio: "inherit",
   });
 
@@ -43,6 +56,7 @@ function applyOperationPlaceholders(
 ): string {
   return command
     .replace(/TARGET_DIR/g, context.targetDir)
+    .replace(/TARGET_BASENAME/g, path.basename(context.root))
     .replace(/PACKAGE_MANAGER/g, context.pkgManager)
     .replace(/INSTALL_FLAG/g, context.noInstall ? "" : "--install")
     .replace(/GIT_FLAG/g, context.noGit ? "" : "--git")
@@ -71,12 +85,16 @@ export function runOperation(
       return;
     }
     case "create": {
+      const targetArg =
+        operation.targetArgument === "targetBasename"
+          ? "TARGET_BASENAME"
+          : "TARGET_DIR";
       const args = [...(operation.args ?? [])];
       if (context.noGit && operation.disableGitArg) {
         args.push(operation.disableGitArg);
       }
       const command = applyOperationPlaceholders(
-        adapter.create(operation.packageName, ["TARGET_DIR", ...args]),
+        adapter.create(operation.packageName, [targetArg, ...args]),
         context
       );
       context.logger.debug(

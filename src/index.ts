@@ -2,6 +2,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import mri from "mri";
 import * as prompts from "@clack/prompts";
 import colors from "picocolors";
@@ -44,11 +45,38 @@ import {
 
 const argv = mri<CliArgs>(process.argv.slice(2), {
   alias: { h: "help", t: "template", y: "yes" },
-  boolean: ["help", "overwrite", "yes", "verbose", "no-git", "no-install"],
+  boolean: [
+    "help",
+    "overwrite",
+    "yes",
+    "verbose",
+    "git",
+    "install",
+    "no-git",
+    "no-install",
+  ],
   string: ["template", "package-manager"],
 });
 
 const cwd = process.cwd();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+function getPackageVersion(): string {
+  const packageJsonPath = [
+    path.join(__dirname, "../package.json"),
+    path.join(__dirname, "package.json"),
+  ].find((candidate) => fs.existsSync(candidate));
+
+  if (!packageJsonPath) {
+    return "";
+  }
+
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8")) as {
+    version?: string;
+  };
+
+  return packageJson.version ?? "";
+}
 
 function createSuccessMessage(
   root: string,
@@ -57,7 +85,13 @@ function createSuccessMessage(
   notes: string[] = []
 ): string {
   const lines = ["🎉 Project created successfully!", "", "Next steps:"];
-  const cdProjectName = path.relative(cwdPath, root);
+  const relativeRoot = path.relative(cwdPath, root);
+  const cdProjectName =
+    relativeRoot === ".." ||
+    relativeRoot.startsWith(`..${path.sep}`) ||
+    path.isAbsolute(relativeRoot)
+      ? root
+      : relativeRoot;
 
   if (root !== cwdPath) {
     lines.push(
@@ -85,8 +119,8 @@ async function init() {
   const argOverwrite = argv.overwrite;
   const argYes = argv.yes ?? false;
   const argVerbose = argv.verbose ?? false;
-  const argNoInstall = argv["no-install"] ?? false;
-  const argNoGit = argv["no-git"] ?? false;
+  const argNoInstall = argv["no-install"] === true || argv.install === false;
+  const argNoGit = argv["no-git"] === true || argv.git === false;
   const argPackageManager = argv["package-manager"];
 
   const help = argv.help;
@@ -104,7 +138,9 @@ async function init() {
   const pkgInfo = resolvePackageManagerInfo(argPackageManager, detectedPkgInfo);
   const cancel = () => prompts.cancel("Operation cancelled");
 
-  prompts.intro(colors.bgCyan(colors.black(" create-web-kit ")));
+  const version = getPackageVersion();
+  const introTitle = version ? ` create-web-kit@${version} ` : " create-web-kit ";
+  prompts.intro(colors.bgCyan(colors.black(introTitle)));
 
   // 1. Get project name and target dir
   let targetDir = argTargetDir ?? (argYes ? defaultTargetDir : undefined);
@@ -248,7 +284,7 @@ async function init() {
     template = variant;
   }
 
-  const root = path.join(cwd, targetDir);
+  const root = path.resolve(cwd, targetDir);
   const pkgManager = pkgInfo ? pkgInfo.name : "npm";
   const selectedVariant = template
     ? resolveVariantDefinition(template)

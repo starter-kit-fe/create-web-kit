@@ -11,6 +11,8 @@ export interface CliArgs {
   help?: boolean;
   overwrite?: boolean;
   verbose?: boolean;
+  git?: boolean;
+  install?: boolean;
   "package-manager"?: string;
   "no-install"?: boolean;
   "no-git"?: boolean;

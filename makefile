@@ -17,6 +17,7 @@ build:
 	@rm -rf dist/templates dist/assets
 	@if [ -d src/templates ]; then mkdir -p dist/templates && cp -R src/templates/. dist/templates/; fi
 	@if [ -d src/assets ]; then mkdir -p dist/assets && cp -R src/assets/. dist/assets/; fi
+	@cp package.json dist/package.json
 	@if [ -f dist/index.js ]; then chmod +x dist/index.js; fi
 	@echo "Build completed."
 

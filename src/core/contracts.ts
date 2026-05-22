@@ -1,7 +1,8 @@
 import type { ColorFunc } from "../types/index.js";
 import type { ProjectContext } from "./context.js";
 
-export type WorkingDirectory = "root" | "target";
+export type CreateTargetArgument = "targetDir" | "targetBasename";
+export type WorkingDirectory = "root" | "target" | "target-parent";
 
 export interface CommandOperation {
   kind: "command";
@@ -16,6 +17,7 @@ export interface CreateOperation {
   description: string;
   packageName: string;
   args?: string[];
+  targetArgument?: CreateTargetArgument;
   disableGitArg?: string;
   workingDir?: WorkingDirectory;
 }

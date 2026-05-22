@@ -11,8 +11,8 @@ test("package manager adapter builds add/create/dlx/exec commands for npm", () =
     "npm create vue@latest TARGET_DIR"
   );
   assert.equal(
-    adapter.create("electron-vite@latest", ["TARGET_DIR", "--template", "react-ts"]),
-    "npm create electron-vite@latest -- TARGET_DIR --template react-ts"
+    adapter.create("@quick-start/electron@latest", ["TARGET_DIR", "--template", "react-ts"]),
+    "npm create @quick-start/electron@latest -- TARGET_DIR --template react-ts"
   );
   assert.equal(adapter.dlx("shadcn@latest", ["init", "-y"]), "npx shadcn@latest init -y");
   assert.equal(
