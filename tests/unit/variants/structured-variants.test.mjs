@@ -76,8 +76,11 @@ test("resolveVariantDefinition returns structured react-vite definition", () => 
   assert.ok(definition);
   assert.equal(definition.id, "react-vite");
   assert.equal(definition.operations?.[0]?.kind, "command");
-  assert.equal(definition.operations?.[1]?.kind, "dlx");
-  assert.equal(definition.operations?.[2]?.kind, "install-packages");
+  assert.equal(definition.operations?.[1]?.kind, "install-packages");
+  assert.equal(definition.operations?.[2]?.kind, "command");
+  assert.equal(definition.operations?.[3]?.kind, "dlx");
+  assert.equal(definition.operations?.[4]?.kind, "dlx");
+  assert.equal(definition.operations?.length, 5);
 });
 
 test("resolveVariantDefinition returns structured nuxt3 definition", () => {

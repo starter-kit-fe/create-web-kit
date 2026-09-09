@@ -7,12 +7,14 @@ import type {
   CreateOperation,
   DlxOperation,
   InstallPackagesOperation,
+  OperationOutputOptions,
   VariantOperation,
   WorkingDirectory,
 } from "../contracts.js";
 import { CliError } from "../errors.js";
 import { createPackageManagerAdapter } from "../package-manager.js";
 import { splitCommand } from "../../utils/command.js";
+import { updatePackageJson } from "./files.js";
 
 function getWorkingDirectory(
   context: ProjectContext,
@@ -30,7 +32,8 @@ function getWorkingDirectory(
 function executeCommandString(
   command: string,
   context: ProjectContext,
-  workingDir: WorkingDirectory = "target"
+  workingDir: WorkingDirectory = "target",
+  options: OperationOutputOptions = {}
 ): void {
   const cwd = getWorkingDirectory(context, workingDir);
   if (workingDir === "target-parent") {
@@ -38,16 +41,23 @@ function executeCommandString(
   }
 
   const [cmd, ...args] = splitCommand(command);
+  const capture = options.quiet && !context.verbose;
+  const startedAt = Date.now();
   const result = spawn.sync(cmd, args, {
     cwd,
-    stdio: "inherit",
+    stdio: capture ? ["ignore", "pipe", "pipe"] : "inherit",
+    encoding: "utf8",
+    maxBuffer: 10 * 1024 * 1024,
+    env: options.autoConfirm ? { ...process.env, npm_config_yes: "true" } : process.env,
   });
 
-  if (result.status !== 0) {
-    throw new CliError(`Failed to execute: ${command}`, {
-      exitCode: result.status ?? 1,
+  if (result.status !== 0 || result.error) {
+    const details = [result.stdout, result.stderr, result.error?.message].filter(Boolean).join("\n");
+    throw new CliError(`Failed to execute: ${command}${details ? `\n${details}` : ""}`, {
+      exitCode: result.status || 1,
     });
   }
+  if (capture) context.logger.info(`Completed in ${((Date.now() - startedAt) / 1000).toFixed(1)}s`);
 }
 
 function applyOperationPlaceholders(
@@ -81,7 +91,7 @@ export function runOperation(
       context.logger.debug(
         `Executing command operation in ${operation.workingDir ?? "target"}: ${command}`
       );
-      executeCommandString(command, context, operation.workingDir);
+      executeCommandString(command, context, operation.workingDir, operation);
       return;
     }
     case "create": {
@@ -100,7 +110,7 @@ export function runOperation(
       context.logger.debug(
         `Executing create operation in ${operation.workingDir ?? "root"}: ${command}`
       );
-      executeCommandString(command, context, operation.workingDir ?? "root");
+      executeCommandString(command, context, operation.workingDir ?? "root", operation);
       return;
     }
     case "dlx": {
@@ -111,7 +121,7 @@ export function runOperation(
       context.logger.debug(
         `Executing dlx operation in ${operation.workingDir ?? "target"}: ${command}`
       );
-      executeCommandString(command, context, operation.workingDir);
+      executeCommandString(command, context, operation.workingDir, operation);
       return;
     }
     case "install-packages": {
@@ -121,11 +131,28 @@ export function runOperation(
         );
         return;
       }
-      const command = adapter.add(operation.packages, { dev: operation.dev });
+      if (operation.devPackages) {
+        if (operation.dev) throw new CliError("dev and devPackages cannot be combined");
+        updatePackageJson<Record<string, unknown>>(getWorkingDirectory(context, operation.workingDir), (pkg) => {
+          const dependencies = { ...(pkg.dependencies as Record<string, string> | undefined) };
+          const devDependencies = { ...(pkg.devDependencies as Record<string, string> | undefined) };
+          for (const name of operation.packages) {
+            dependencies[name] ??= devDependencies[name] ?? "latest";
+            delete devDependencies[name];
+          }
+          for (const name of operation.devPackages ?? []) {
+            if (!(name in dependencies)) devDependencies[name] ??= "latest";
+          }
+          return { ...pkg, dependencies, devDependencies };
+        });
+      }
+      const command = operation.devPackages
+        ? adapter.install()
+        : adapter.add(operation.packages, { dev: operation.dev });
       context.logger.debug(
         `Installing packages in ${operation.workingDir ?? "target"}: ${command}`
       );
-      executeCommandString(command, context, operation.workingDir);
+      executeCommandString(command, context, operation.workingDir, operation);
       return;
     }
   }

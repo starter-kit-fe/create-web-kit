@@ -82,6 +82,7 @@ test("createReactViteFiles rewrites fixture to react-vite starter shape", () => 
     const runner = `
 import { createReactViteFiles } from ${JSON.stringify(distReactViteGeneratorPath)};
 createReactViteFiles(process.argv[1], { name: "npm", version: "10.0.0" });
+createReactViteFiles(process.argv[1], undefined, { noGit: true });
 `;
 
     const result = spawnSync(
@@ -107,9 +108,28 @@ createReactViteFiles(process.argv[1], { name: "npm", version: "10.0.0" });
       ".prettierrc",
       ".env.development",
       ".env.production",
-      ".devcontainer/devcontainer.json",
       "src/App.tsx",
-      "src/pages/home.tsx",
+      "index.html",
+      "vite.config.ts",
+      "README.md",
+      "src/views/home/index.tsx",
+      "src/views/about/index.tsx",
+      "public/_headers",
+      "public/app-update-checker.worker.js",
+      "src/components/ui/animated-segmented-tabs.tsx",
+      "src/components/ui/sweep-shine.tsx",
+      "src/components/cookie-consent-banner.tsx",
+      "src/components/update-available-notice.tsx",
+      "src/components/providers/app-update-checker.tsx",
+      "src/components/providers/route-progress.tsx",
+      "src/store/app-update.ts",
+      "src/components/theme-toggle.tsx",
+      "src/components/providers/theme-provider.tsx",
+      "src/hooks/use-theme.ts",
+      "src/hooks/use-mobile.ts",
+      "src/store/theme.ts",
+      "src/index.css",
+      "src/layout/index.tsx",
       "src/components/build-info.tsx",
       "src/components/providers/query-provider.tsx",
       "src/lib/request.ts",
@@ -122,6 +142,42 @@ createReactViteFiles(process.argv[1], { name: "npm", version: "10.0.0" });
         `missing generated file: ${relativePath}`
       );
     }
+
+    const read = (file) => fs.readFileSync(path.join(projectRoot, file), "utf-8");
+    assert.match(read("src/main.tsx"), /BrowserRouter/);
+    assert.match(read("src/main.tsx"), /<RouteProgress \/>/);
+    assert.match(read("src/index.css"), /#nprogress/);
+    assert.doesNotMatch(read("src/main.tsx"), /HashRouter/);
+    assert.match(read("src/main.tsx"), /<Provider>/);
+    assert.match(read("src/main.tsx"), /<ThemeProvider>/);
+    assert.match(read("src/views/home/index.tsx"), /zodResolver\(schema\)/);
+    assert.match(read("src/views/home/index.tsx"), /prefers-reduced-motion/);
+    assert.match(read("src/views/home/index.tsx"), /media\.revert\(\)/);
+    assert.match(read("src/App.tsx"), /path="\/about"/);
+    assert.match(read("src/App.tsx"), /from "@\/views\/home"/);
+    assert.match(read("src/App.tsx"), /<Route element={<AppLayout \/>}>/);
+    assert.match(read("src/layout/index.tsx"), /<Outlet \/>/);
+    assert.match(read("src/layout/index.tsx"), /<ThemeToggle \/>/);
+    assert.match(read("src/layout/index.tsx"), /<AnimatedSegmentedTabs/);
+    assert.match(read("src/layout/index.tsx"), /navigate\(value\)/);
+    assert.match(read("src/layout/index.tsx"), /useLocation/);
+    assert.match(read("src/layout/index.tsx"), /<AppUpdateChecker \/>/);
+    assert.match(read("src/layout/index.tsx"), /<CookieConsentBanner \/>/);
+    assert.match(read("src/components/cookie-consent-banner.tsx"), /\/about#cookies/);
+    assert.match(read("src/views/about/index.tsx"), /id="cookies"/);
+    assert.match(read("src/index.css"), /@keyframes sweep-shine/);
+    assert.doesNotMatch(read("src/App.tsx"), /<header|<footer/);
+    assert.match(read("public/_headers"), /frame-ancestors 'none'/);
+    assert.match(read("src/store/theme.ts"), /atomWithStorage/);
+    assert.match(read("src/components/theme-toggle.tsx"), /<Drawer>/);
+    assert.match(read("src/components/theme-toggle.tsx"), /<DropdownMenu>/);
+    assert.match(read("src/index.css"), /data-layout="centered"/);
+    assert.ok(read("src/index.css").startsWith("@import 'tailwindcss';\n"));
+    assert.equal(read("src/index.css").split("/* Create Web Kit global styles */").length, 2);
+    assert.equal(fs.existsSync(path.join(projectRoot, "src/styles/appearance.css")), false);
+    assert.deepEqual(read("src/main.tsx").match(/import "[^\"]+\.css";/g), ['import "@/index.css";']);
+    assert.match(read("index.html"), /document\.documentMode/);
+    assert.ok(read("index.html").indexOf("document.documentMode") < read("index.html").indexOf('type="module"'));
 
     const removedFiles = ["src/App.css", "src/assets/react.svg", "public/vite.svg"];
     for (const relativePath of removedFiles) {
@@ -143,7 +199,9 @@ createReactViteFiles(process.argv[1], { name: "npm", version: "10.0.0" });
 
     const commandLog = fs.readFileSync(commandLogPath, "utf-8");
     assert.equal(commandLog.includes("git init"), true);
-    assert.equal(commandLog.includes("npx husky install"), true);
+    assert.equal(commandLog.includes("npx husky\n"), true);
+    assert.equal(commandLog.includes("husky install"), false);
+    assert.doesNotMatch(read(".husky/pre-commit"), /husky\.sh/);
   } finally {
     fs.rmSync(tempRoot, { recursive: true, force: true });
   }

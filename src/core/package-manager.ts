@@ -11,6 +11,7 @@ export interface PackageManagerAdapter {
   create(packageName: string, args?: string[]): string;
   dlx(packageName: string, args?: string[]): string;
   add(packages: string[], options?: InstallPackagesOptions): string;
+  install(): string;
   exec(command: string): string;
   getFullCustomCommand(customCommand: string): string;
   replaceInCommand(command: string): string;
@@ -168,6 +169,7 @@ export function createPackageManagerAdapter(
     create,
     dlx,
     add,
+    install: () => `${name} install`,
     exec,
     getFullCustomCommand,
     replaceInCommand,

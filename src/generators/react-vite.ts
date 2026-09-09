@@ -1,5 +1,12 @@
+import fs from "node:fs";
+import path from "node:path";
 import type { PkgInfo } from "../types/index.js";
-import { copyTemplateFiles, type TemplateFile } from "../utils/template.js";
+import {
+  copyTemplateFiles,
+  getTemplatePath,
+  readTemplateFile,
+  type TemplateFile,
+} from "../utils/template.js";
 import {
   mergeJson,
   removePaths,
@@ -16,16 +23,60 @@ interface ReactViteGeneratorOptions {
 
 const TEMPLATE_FILES: TemplateFile[] = [
   { source: "prettier.config.json", destination: ".prettierrc", isJson: true },
-  {
-    source: ".devcontainer/devcontainer.json",
-    destination: ".devcontainer/devcontainer.json",
-    isJson: true,
-  },
   { source: ".env.development", destination: ".env.development" },
   { source: ".env.production", destination: ".env.production" },
   { source: "src/main.tsx", destination: "src/main.tsx" },
   { source: "src/App.tsx", destination: "src/App.tsx" },
-  { source: "src/pages/home.tsx", destination: "src/pages/home.tsx" },
+  { source: "index.html", destination: "index.html" },
+  { source: "vite.config.ts", destination: "vite.config.ts" },
+  { source: "public/_headers", destination: "public/_headers" },
+  {
+    source: "public/app-update-checker.worker.js",
+    destination: "public/app-update-checker.worker.js",
+  },
+  {
+    source: "src/components/ui/animated-segmented-tabs.tsx",
+    destination: "src/components/ui/animated-segmented-tabs.tsx",
+  },
+  {
+    source: "src/components/ui/sweep-shine.tsx",
+    destination: "src/components/ui/sweep-shine.tsx",
+  },
+  {
+    source: "src/components/cookie-consent-banner.tsx",
+    destination: "src/components/cookie-consent-banner.tsx",
+  },
+  {
+    source: "src/components/update-available-notice.tsx",
+    destination: "src/components/update-available-notice.tsx",
+  },
+  {
+    source: "src/components/providers/app-update-checker.tsx",
+    destination: "src/components/providers/app-update-checker.tsx",
+  },
+  { source: "src/store/app-update.ts", destination: "src/store/app-update.ts" },
+  { source: "README.md", destination: "README.md" },
+  {
+    source: "src/views/home/index.tsx",
+    destination: "src/views/home/index.tsx",
+  },
+  {
+    source: "src/views/about/index.tsx",
+    destination: "src/views/about/index.tsx",
+  },
+  {
+    source: "src/components/theme-toggle.tsx",
+    destination: "src/components/theme-toggle.tsx",
+  },
+  {
+    source: "src/components/providers/theme-provider.tsx",
+    destination: "src/components/providers/theme-provider.tsx",
+  },
+  { source: "src/hooks/use-theme.ts", destination: "src/hooks/use-theme.ts" },
+  { source: "src/hooks/use-mobile.ts", destination: "src/hooks/use-mobile.ts" },
+  { source: "src/store/theme.ts", destination: "src/store/theme.ts" },
+  { source: "src/layout/index.tsx", destination: "src/layout/index.tsx" },
+  { source: "src/components/providers/route-progress.tsx", destination: "src/components/providers/route-progress.tsx" },
   {
     source: "src/components/build-info.tsx",
     destination: "src/components/build-info.tsx",
@@ -53,10 +104,22 @@ function mergeKeywords(current: unknown, next: string[]): string[] {
 export function createReactViteFiles(
   root: string,
   pkgInfo?: PkgInfo,
-  options: ReactViteGeneratorOptions = {}
+  options: ReactViteGeneratorOptions = {},
 ): void {
   removePaths(root, DEFAULT_REACT_VITE_FILES);
   copyTemplateFiles(TEMPLATE_NAME, TEMPLATE_FILES, root);
+
+  // Keep shadcn's generated Tailwind imports and theme tokens in the same global file.
+  const cssPath = path.join(root, "src/index.css");
+  const css = fs.readFileSync(cssPath, "utf8");
+  const marker = "/* Create Web Kit global styles */";
+  if (!css.includes(marker)) {
+    const globalStyles = readTemplateFile(
+      getTemplatePath(TEMPLATE_NAME),
+      "src/index.css",
+    );
+    fs.writeFileSync(cssPath, `${css.trimEnd()}\n\n${marker}\n${globalStyles}`);
+  }
 
   updatePackageJson<Record<string, unknown>>(root, (pkg) => {
     const currentScripts =
@@ -112,5 +175,6 @@ export function createReactViteFiles(
   initializeHusky(root, pkgInfo, {
     ...options,
     initializeGitIfMissing: true,
+    modernHusky: true,
   });
 }

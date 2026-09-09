@@ -59,7 +59,7 @@ Create Web Kit 更偏向下面这套思路：
 | Variant | 基于官方命令 | 典型增强内容 |
 | --- | --- | --- |
 | `astro-content` | `create-astro` | 内容站/官网默认首页、content collection、MDX/sitemap 起点、Prettier、环境变量示例 |
-| `react-vite` | `create-vite` | React SPA、shadcn/ui、TanStack Query/Table、Prettier、Husky、lint-staged、请求封装、Vite 环境变量示例 |
+| `react-vite` | `create-vite` | React SPA、History 路由、shadcn/ui、Zod/RHF、Jotai、GSAP、亮色/暗黑主题、IE 不支持提示、TanStack Query/Table、Prettier、Husky、lint-staged、请求封装 |
 | `nextjs-csr` | `create-next-app` | Shadcn UI、TanStack Query/Table、Prettier、Husky、lint-staged、环境变量、providers、请求封装、构建信息组件等 |
 | `nextjs-ssr` | `create-next-app` | Shadcn UI、React Query、NextAuth、Prisma、SSR 环境变量示例 |
 | `vue3` | `create-vue` | Pinia、`@vueuse/core`、开发依赖、Vite 配置补充 |

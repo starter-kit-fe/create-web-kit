@@ -10,6 +10,7 @@ export interface GeneratorGitOptions {
   noGit?: boolean;
   verbose?: boolean;
   initializeGitIfMissing?: boolean;
+  modernHusky?: boolean;
 }
 
 export function runCommand(command: string, cwd: string): void {
@@ -65,13 +66,15 @@ export function initializeHusky(
     }
 
     const adapter = createPackageManagerAdapter(pkgInfo);
-    runCommand(adapter.exec("husky install"), root);
+    runCommand(adapter.exec(options.modernHusky ? "husky" : "husky install"), root);
 
     const huskyDir = path.join(root, ".husky");
     ensureDirectory(huskyDir);
 
     const preCommitPath = path.join(huskyDir, "pre-commit");
-    const preCommitContent = `#!/usr/bin/env sh
+    const preCommitContent = options.modernHusky
+      ? `${adapter.exec("lint-staged")}\n`
+      : `#!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
 ${adapter.exec("lint-staged")}
