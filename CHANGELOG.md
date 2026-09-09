@@ -1,5 +1,11 @@
 # create-web-kit
 
+## 26.410.1
+
+### Patch Changes
+
+- update
+
 ## 26.410.0
 
 ### Minor Changes
