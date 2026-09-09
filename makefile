@@ -10,7 +10,7 @@ endif
 
 dev:
 	@$(MAKE) build
-	@node dist/index.js
+	@node dist/index.js --package-manager pnpm
 
 build:
 	@$(PNPM) exec tsc -d --outDir dist

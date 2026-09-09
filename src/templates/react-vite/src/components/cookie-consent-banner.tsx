@@ -1,12 +1,11 @@
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ShieldCheck } from "lucide-react";
@@ -147,6 +146,7 @@ export function CookieConsentBanner() {
   if (!visible) return null;
 
   return (
+    <Dialog>
     <section
       ref={wrapperRef}
       role="region"
@@ -156,47 +156,24 @@ export function CookieConsentBanner() {
     >
       <Card
         ref={cardRef}
-        className={[
-          "pointer-events-auto w-full gap-0 overflow-hidden py-0",
-          "border-border/60 bg-card/95 shadow-[0_18px_50px_-24px_rgba(15,23,42,0.35)] backdrop-blur-xl",
-          "supports-[backdrop-filter]:bg-card/85",
-          "rounded-2xl border",
-        ].join(" ")}
+        size="sm"
+        className="w-full gap-0 rounded-xl border border-border/60 shadow-none ring-0"
       >
-        <CardHeader
-          className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 px-4 pt-4 pb-3 sm:px-5 sm:pt-5"
-          data-cc-item
-        >
-          <span className="row-span-2 mt-0.5 grid size-10 place-items-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/10">
-            <ShieldCheck className="size-5" />
-          </span>
-          <CardTitle className="text-sm leading-5 sm:text-base">
-            必要的浏览器存储
-          </CardTitle>
-          <CardDescription className="max-w-md text-sm leading-5">
-            本模板仅使用记住界面设置和存储说明确认状态所需的 Cookie
-            与本地存储，不包含广告或行为分析 Cookie。
-          </CardDescription>
-        </CardHeader>
-
-        <CardFooter
-          className="flex flex-col-reverse gap-2 px-4 pb-4 sm:flex-row sm:items-center sm:justify-end sm:px-5 sm:pb-5"
-          data-cc-item
-        >
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            asChild
-            className="w-full sm:w-auto"
-            aria-label="查看 Cookie 政策"
-          >
-            <Link to="/about#cookies">查看存储说明</Link>
-          </Button>
+        <CardHeader className="flex items-start gap-2.5" data-cc-item>
+          <ShieldCheck className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+          <div className="min-w-0 flex-1">
+            <CardTitle className="leading-5">尊重你的隐私</CardTitle>
+            <CardDescription className="mt-0.5 text-xs leading-5">
+              仅保存界面偏好，不用于广告追踪。
+              <DialogTrigger asChild>
+                <Button type="button" variant="link" className="h-auto p-0 text-xs leading-5" aria-label="查看浏览器存储说明">说明</Button>
+              </DialogTrigger>
+            </CardDescription>
+          </div>
           <Button
             type="button"
             size="sm"
-            className="w-full sm:w-auto"
+            className="h-7 shrink-0 self-center px-2.5 text-xs"
             onClick={handleAccept}
             disabled={accepting}
             aria-busy={accepting}
@@ -204,8 +181,17 @@ export function CookieConsentBanner() {
           >
             知道了
           </Button>
-        </CardFooter>
+        </CardHeader>
       </Card>
+      <DialogContent className="sm:max-w-sm">
+        <DialogHeader>
+          <DialogTitle>浏览器存储说明</DialogTitle>
+          <DialogDescription className="pt-2 leading-6">
+            本站用本地存储记住主题和界面偏好；确认此提示后，会写入 starter_cookie_consent 标记和一年有效的同名 Cookie。你可以通过浏览器的网站数据设置清除这些信息。模板不包含广告或行为分析，“知道了”不代表同意非必要追踪。
+          </DialogDescription>
+        </DialogHeader>
+      </DialogContent>
     </section>
+    </Dialog>
   );
 }

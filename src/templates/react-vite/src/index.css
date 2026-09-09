@@ -96,11 +96,14 @@ body {
   min-width: 320px;
 }
 .app-shell {
+  position: relative;
+  display: grid;
+  place-items: center;
   min-height: 100vh;
   min-height: 100dvh;
-  padding: calc(2.5rem + env(safe-area-inset-top, 0px))
+  padding: calc(5rem + env(safe-area-inset-top, 0px))
     calc(1.5rem + env(safe-area-inset-right, 0px))
-    calc(2.5rem + env(safe-area-inset-bottom, 0px))
+    calc(5rem + env(safe-area-inset-bottom, 0px))
     calc(1.5rem + env(safe-area-inset-left, 0px));
 }
 /* iOS Safari zooms focused text fields smaller than 16px. */
@@ -116,6 +119,9 @@ body {
   animation: none;
   mix-blend-mode: normal;
 }
+::view-transition-old(root) { z-index: 1; }
+::view-transition-new(root) { z-index: 2; }
+::view-transition-group(root) { animation-duration: 0s; }
 
 /* NProgress: one global stylesheet, themed bar without a spinner. */
 #nprogress { pointer-events: none; }

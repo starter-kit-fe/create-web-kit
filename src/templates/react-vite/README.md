@@ -65,15 +65,16 @@ API 路径应单独配置代理，不要回退到 HTML。静态资源缺失应�
 
 ## 默认功能
 
-- BuildInfo 直接从 `package.json` 导入名称、版本，不定义 `VITE_APP_NAME` / `VITE_APP_VERSION`。`VITE_BUILD_TIME` 由 Vite `define` 注入 ISO 时间，无需在 `.env` 配置；生产环境为打包时间，开发环境为开发服务启动时间。使用 date-fns 格式化为 `yyyy-MM-dd HH:mm:ss xxx`，按访问者本地时区显示并附带时区偏移。控制台用彩色标签输出版本和时间，其他浏览器公开环境变量在默认折叠的表格分组中显示。不要在 `VITE_*` 变量中放置密钥。
+- BuildInfo 直接从 `package.json` 导入名称、版本，不定义 `VITE_APP_NAME` / `VITE_APP_VERSION`。`VITE_BUILD_TIME` 由 Vite `define` 注入 ISO 时间，无需在 `.env` 配置；生产环境为打包时间，开发环境为开发服务启动时间。使用 date-fns 按访问者本地时区格式化；页面紧凑显示 `yyyy-MM-dd HH:mm`，悬停显示带秒、时区偏移的完整时间及中文相对时间。控制台用彩色标签输出版本和时间，其他浏览器公开环境变量在默认折叠的表格分组中显示。不要在 `VITE_*` 变量中放置密钥。
 
 - 导航使用 AnimatedSegmentedTabs（GSAP 动画），选中值从 URL 获取，通过 React Router 切换首页与关于页，支持浏览器前进/后退；方向键移动焦点，Enter/Space 确认切换。
 - NProgress 顶部进度条统一监听 React Router 的 location，覆盖 Anim Tab、Link、程序跳转和浏览器前进/后退。默认不显示转圈图标，使用主题主色，支持减少动态效果。当前页面为同步加载，进度条是页面提交后的短暂切换反馈，不代表接口或异步资源加载进度。
-- CookieConsentBanner 提示必要浏览器存储，确认状态写入 localStorage 和同名 Cookie；说明链接指向 `/about#cookies`，不新增额外路由。
-- Cookie 提示与更新提示共用通知容器，避免相互覆盖。
+- CookieConsentBanner 使用紧凑同行布局，确认状态写入 localStorage 和同名 Cookie；“说明”打开隐私对话框，不占用首页或关于页的内容。
+- Cookie 提示与更新提示共用紧凑通知容器，留出内边距避免边缘被裁切；Cookie 提示使用轻边框、无阴影、小图标和同行确认按钮。
 - SweepShine 提供文字和表面两种加载效果，CSS 统一在 `src/index.css`，减少动态效果偏好下不播放动画。
-- 首页包含 Zod + React Hook Form 校验示例与 GSAP 入场动画；减少动态效果偏好会禁用动画。
-- 外观设置复用 ThemeToggle：亮色、暗黑、跟随系统，以及主色、圆角、字体、布局；设置持久化到 localStorage。
+- 首页和关于页各保留一句介绍，不展示表单或功能卡片。整体为低对比背景上的单个无边框、无阴影面板，顶部是 Anim Tab 和主题按钮；表单与数据相关依赖仍默认安装，供后续开发使用。
+- 默认使用 `components/theme/theme-toggle-button.tsx` 的紧凑日/月按钮；明暗两种方向都从实际点击位置向外扩散，键盘触发时从按钮中心扩散，不支持 View Transitions 或偏好减少动态效果时直接切换。主题持久化到 localStorage。
+- 原 `ThemeToggle` 完整外观面板保留为可选组件，不再默认展示。
 - Jotai Provider 位于入口，主题状态在 `src/store/theme.ts`；表单状态由 RHF 管理，服务端数据由 Query 管理。
 - `@/*` 对应 `src/*`，已同时配置 TypeScript 路径映射和 Vite 别名，例如 `@/views/home`、`@/layout`。
 - `src/index.css` 是唯一全局 CSS 入口：保留 shadcn CLI 生成的 Tailwind 导入和主题变量，生成器追加主色、圆角、字号、布局及移动端样式，不再单独使用 `appearance.css`。后续全局样式统一写在此文件。

@@ -69,6 +69,10 @@ const TEMPLATE_FILES: TemplateFile[] = [
     destination: "src/components/theme-toggle.tsx",
   },
   {
+    source: "src/components/theme/theme-toggle-button.tsx",
+    destination: "src/components/theme/theme-toggle-button.tsx",
+  },
+  {
     source: "src/components/providers/theme-provider.tsx",
     destination: "src/components/providers/theme-provider.tsx",
   },

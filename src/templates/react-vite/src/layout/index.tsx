@@ -3,7 +3,7 @@ import { Tabs } from "radix-ui";
 import { Toaster } from "sonner";
 import { AnimatedSegmentedTabs } from "@/components/ui/animated-segmented-tabs";
 import { BuildInfo } from "@/components/build-info";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeToggleButton } from "@/components/theme/theme-toggle-button";
 import { CookieConsentBanner } from "@/components/cookie-consent-banner";
 import { AppUpdateChecker } from "@/components/providers/app-update-checker";
 import { useTheme } from "@/hooks/use-theme";
@@ -22,40 +22,37 @@ export function AppLayout() {
 
   return (
     <>
-      <div className="app-shell bg-background text-foreground">
-        <div className="app-container flex flex-col gap-10">
-          <header className="flex items-center justify-between gap-4">
-            <span className="font-semibold">React Vite Starter</span>
-            <ThemeToggle />
-          </header>
+      <div className="app-shell bg-muted/50 text-foreground">
+        <div className="app-container mx-auto w-full max-w-3xl">
           <AnimatedSegmentedTabs
             label="主导航"
             options={routes}
             value={activeRoute}
             onValueChange={(value) => navigate(value)}
             activationMode="manual"
-            className="flex flex-col gap-10"
+            className="grid grid-cols-[1fr_auto] items-start gap-x-4 gap-y-8 rounded-2xl border-0 bg-card p-5 shadow-none sm:p-8"
+            listClassName="bg-muted/70"
+            highlightClassName="shadow-none ring-0"
           >
+            <ThemeToggleButton className="col-start-2 row-start-1" />
             {knownRoute ? (
               <Tabs.Content value={activeRoute} asChild>
-                <main>
+                <main className="col-span-2 flex min-h-36 items-center py-4 sm:min-h-44">
                   <Outlet />
                 </main>
               </Tabs.Content>
             ) : (
-              <main>
-                <Outlet />
-              </main>
+              <main className="col-span-2"><Outlet /></main>
             )}
           </AnimatedSegmentedTabs>
-          <footer>
-            <BuildInfo />
-          </footer>
         </div>
+        <footer className="absolute inset-x-6 bottom-[max(1.5rem,env(safe-area-inset-bottom))] flex justify-center">
+          <BuildInfo />
+        </footer>
       </div>
       <aside
         aria-label="站点通知"
-        className="fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-50 flex max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg flex-col gap-3 overflow-y-auto sm:right-6"
+        className="fixed right-2 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-50 flex max-h-[calc(100dvh-1rem)] w-[calc(100%-1rem)] max-w-[23rem] flex-col gap-2 overflow-y-auto p-1 sm:right-4 sm:bottom-[max(1rem,env(safe-area-inset-bottom))]"
       >
         <AppUpdateChecker />
         <CookieConsentBanner />
